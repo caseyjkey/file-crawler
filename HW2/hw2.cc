@@ -140,9 +140,9 @@ vector< pair<string, string> > readMediaTypeFile(string dir) {
 	return mediaTypes;
 }
 
-string stohex(int num) {
+string inttohex(int num) {
 	// https://bit.ly/2InTEd9
-    string d = "0123456789ABCDEF";
+    string d = "0123456789abcdef"; //
     string res;
     while(num > 0)
     {
@@ -161,7 +161,7 @@ string readMagicNumber(string dir) {
 		file.get(chrctr);
         //cout << "character: " << chrctr << "\n";
 		if(chrctr < '!' || chrctr > '~') {
-			magicNum += "%" +  stohex(chrctr);
+			magicNum += "%" +  inttohex(chrctr);
 		} else {
 			magicNum += chrctr;
 		}
