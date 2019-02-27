@@ -1,0 +1,10 @@
+// modify basefield
+#include <iostream>     // std::cout, std::dec, std::hex, std::oct
+
+int main () {
+  int n = 20;
+  std::cout << std::dec << n << '\n';
+  std::cout <<  << n << '\n';
+  std::cout << std::oct << n << '\n';
+  return 0;
+}

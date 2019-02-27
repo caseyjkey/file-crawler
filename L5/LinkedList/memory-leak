@@ -1,0 +1,18 @@
+==18224== HEAP SUMMARY:
+==18224==     in use at exit: 64 bytes in 4 blocks
+==18224==   total heap usage: 7 allocs, 3 frees, 74,816 bytes allocated
+==18224== 
+==18224== 64 (16 direct, 48 indirect) bytes in 1 blocks are definitely lost in loss record 2 of 2
+==18224==    at 0x4C2F4B6: operator new(unsigned long) (vg_replace_malloc.c:344)
+==18224==    by 0x400A4E: LinkedList::insert(unsigned int) (in /s/bach/n/under/caseykey/CS253/L5/LinkedList/L5)
+==18224==    by 0x40093B: main (in /s/bach/n/under/caseykey/CS253/L5/LinkedList/L5)
+==18224== 
+==18224== LEAK SUMMARY:
+==18224==    definitely lost: 16 bytes in 1 blocks
+==18224==    indirectly lost: 48 bytes in 3 blocks
+==18224==      possibly lost: 0 bytes in 0 blocks
+==18224==    still reachable: 0 bytes in 0 blocks
+==18224==         suppressed: 0 bytes in 0 blocks
+==18224== 
+==18224== For counts of detected and suppressed errors, rerun with: -v
+==18224== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)

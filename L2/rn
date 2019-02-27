@@ -1,0 +1,20 @@
+#! /bin/bash
+if [[ $# -lt 2 ]] || [[ $# -gt 2 ]]; then
+		>&2 echo Usage: ./rn [FILETYPE 1] [FILETYPE 2]
+		exit 1
+fi
+
+old_suffix=$1
+new_suffix=$2
+
+for f in *.$old_suffix
+do
+	new_name=${f%.*}.$new_suffix # % gets rid of what pattern is matched following
+	if [[ -e $new_name ]]; then
+			>&2 echo $new_name already exists. Exiting.
+			exit 2
+	fi
+	echo Renaming $f to $new_name
+	mv ./$f ./$new_name
+done
+exit 0
