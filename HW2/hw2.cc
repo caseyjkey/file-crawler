@@ -70,9 +70,11 @@ int permissions(struct stat &statbuf, string &output) {
 	os << (statbuf.st_mode & S_IRUSR ? 'r' : '-');
 	os << (statbuf.st_mode & S_IWUSR ? 'w' : '-');
 	os << (statbuf.st_mode & S_IXUSR ? 'x' : '-');
+    
 	os << (statbuf.st_mode & S_IRGRP ? 'r' : '-');
 	os << (statbuf.st_mode & S_IWGRP ? 'w' : '-');
 	os << (statbuf.st_mode & S_IXGRP ? 'x' : '-');
+    
 	os << (statbuf.st_mode & S_IROTH ? 'r' : '-');
 	os << (statbuf.st_mode & S_IWOTH ? 'w' : '-');
 	os << (statbuf.st_mode & S_IXOTH ? 'x' : '-');
@@ -187,12 +189,16 @@ string findMediaType(string magicNum, map<string, string> MediaTypes) {
 } */
 
 
-string findMediaType(string magicNum, vector< pair<string, string> > MediaTypes) {
-	bool match;
+string findMediaType(string magicNum, vector< pair<string, string> > MediaTypes, struct stat &statbuf) {
+	if(S_ISDIR(statbuf.st_mode)) return "inode/directory";
+	if(S_ISLNK(statbuf.st_mode)) return "inode/symlink";
+    if(size(statbuf) == 0) return "inode/empty";
+    
+    bool match;
 	for(auto& elem : MediaTypes) {
 		match = 1;
 		for(unsigned int i = 0; i < elem.first.length(); i++) {
-            cout << magicNum[i] << " compared to " << elem.first[i] << "\n";
+            //cout << magicNum[i] << " compared to " << elem.first[i] << "\n";
 			if(magicNum[i] != elem.first[i]) {
                 match = 0;
             }
@@ -205,7 +211,7 @@ string findMediaType(string magicNum, vector< pair<string, string> > MediaTypes)
 int main(int argc, char* argv[]) {
     PROGNAME = argv[0];
 	if(argv[1] == nullptr) {
-		cerr << PROGNAME << " usage: ./hw1 [FILE] [DIRECTORY]\n";
+		cerr << PROGNAME << " usage: ./hw3 [FILE] [DIRECTORY]\n";
 		return 1;
 	}
 
@@ -275,7 +281,7 @@ int main(int argc, char* argv[]) {
                 }
                 else if(tokens[i] == 'M') {
                     //cout << "Magic number: " << readMagicNumber(file) << "\n";
-                    cout << findMediaType(readMagicNumber(file), mediaTypes);
+                    cout << findMediaType(readMagicNumber(file), mediaTypes, statbuf);
                 }
                 }
             }
