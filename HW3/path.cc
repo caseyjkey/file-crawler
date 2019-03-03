@@ -3,44 +3,63 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <sys/stat.h> 
+#include <pwd.h>
+#include <grp.h>
 using namespace std;
 
-class Path (
+class Path {
     public:
-        static vector< pair<string, string> > mediaTypes;
-        Path(string path) {
+        Path(char* path) {
             // Open a statbuf
             struct stat statbuf;
-            int openFile = lstat(path_ &statbuf);
-            if(openFile != 0 {
+            int openFile = lstat(path, &statbuf);
+            if(openFile != 0) {
                 cerr << PROGNAME << ": cannot access'" << path << "': No such file or directory\n";
-                isNull(True);
+               // isNull(true);
                 return;
             }
             // Begin assigning values to attributes
-            path_        = path;
-            access_time_ = time(statbuf, 1, 0, 0);
-            mod_time_    = time(statbuf, 0, 1, 0);
-            status_time_ = time(statbuf, 0, 0 ,1);
-            user_UID_    = user_UID(statbuf);
-            group_UID_   = group_UID(statbuf);
-            user_NAME_   = user_NAME(user_UID);
-            group_NAME_  = group_NAME(user_UID);
-            type_        = findMediaType(magicNum, mediaTypes);
-                           permissions(statbuf, permissions_);
+            string path_        = path;
+            string access_time_ = time(statbuf, 1, 0, 0);
+            string mod_time_    = time(statbuf, 0, 1, 0);
+            string status_time_ = time(statbuf, 0, 0 ,1);
+            int user_UID_    = user_UID(statbuf);
+            int group_UID_   = group_UID(statbuf);
+            string user_NAME_   = user_NAME(user_UID_);
+            string group_NAME_  = group_NAME(group_UID_);
+            string magic_num_ = readMagicNumber(path_);
+            string type_        = findMediaType(magic_num_, mediaTypes, statbuf);
+            //int size_        = size(statbuf);
+            string permissions_;
+            permissions(statbuf, permissions_);
         }
-        
-    private:
+        static string PROGNAME;
+        static vector< pair<string, string> > mediaTypes;
+        static vector< pair<string, string> > readMediaTypeFile(string dir) {
+            ifstream inFile;
+            inFile.open(dir);
+            string token;
+            pair<string, string> mediaEntry;
+            while(inFile >> token) {
+                mediaEntry.first = token;
+                inFile >> token;
+                mediaEntry.second = token;
+                mediaTypes.push_back(mediaEntry);
+            }
+            return mediaTypes;
+        }
+        string isNull_;
         void isNull(bool setTo) {
             isNull_ = setTo;
         }
         
-        int user_UID(struct stat &) {
+        int user_UID(struct stat & statbuf) {
             // https://ibm.co/2GwdIIR
             // Option to access via stat
             return static_cast<int>(statbuf.st_uid);
         }
-        string user_NAME(int) {
+        string user_NAME(int uid) {
             struct passwd *pwd;
             if((pwd = getpwuid(uid)) != NULL)
                 return pwd->pw_name;
@@ -48,10 +67,10 @@ class Path (
                 cerr << PROGNAME << ": " << uid << " not found in user database\n";
             return "uid not found";
         }
-        int group_UID(struct stat&) {
+        int group_UID(struct stat &statbuf) {
             return statbuf.st_gid;
         }
-        string group_NAME(int) {
+        string group_NAME(int gid) {
             struct group *grp;
             if((grp = getgrgid(gid)) != NULL)
                 return grp->gr_name;
@@ -65,7 +84,7 @@ class Path (
             else if(S_ISLNK(statbuf.st_mode)) os << "l";
             else if(S_ISREG(statbuf.st_mode)) os << "-";
             else {
-                cerr << PROGNAME << ": " <<  path_ << " is an undefined file type, wtf?!\n";
+                cerr << PROGNAME << ":  is an undefined file type, wtf?!\n";
                 return 1;
             }
             os << (statbuf.st_mode & S_IRUSR ? 'r' : '-');
@@ -102,26 +121,12 @@ class Path (
             string timeOutput(buf);
             return timeOutput;
         }
-        static vector< pair<string, string> > readMediaTypeFile(string dir) {
-            vector< pair <string, string> > mediaTypes;
-            ifstream inFile;
-            inFile.open(dir);
-            string token;
-            pair<string, string> mediaEntry;
-            while(inFile >> token) {
-                mediaEntry.first = token;
-                inFile >> token;
-                mediaEntry.second = token;
-                mediaTypes.push_back(mediaEntry);
-            }
-            return mediaTypes;
-        }
+        
         string inttohex(int num) {
             // https://bit.ly/2InTEd9
             string d = "0123456789abcdef"; //
             string res;
-            while(num > 0)
-            {
+            while(num > 0) {
                 res = d[num % 16] + res;
                 num /= 16;
             }
@@ -156,26 +161,16 @@ class Path (
                             //cout << magicNum[i] << " compared to " << elem.first[i] << "\n";
                     if(magicNum[i] != elem.first[i]) {
                             match = 0;
-                        }
+                    }
                 }
                 if(match) return elem.second;
             }
             return "application/octet-data";
         }
         
-        bool isNull_;
-        string access_time_;
-        string mod_time_;
-        string status_time_;
-        string path_;
-        string type_;
-        int user_UID_;
-        string permissions_;
-        string group_NAME_;
-        int group_UID_;
-        string user_NAME_;
+
         
-}
+};
 
 
 

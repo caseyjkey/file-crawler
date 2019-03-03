@@ -1,5 +1,6 @@
 #include "path.h"
 #include <iostream>
+#include <string>
 using namespace std;
 
 static string PROGNAME;
@@ -24,6 +25,7 @@ vector<string> parseFormatString(string str, int len) {
 
 int main(int argc, char* argv[]) {
     PROGNAME = argv[0];
+    Path::PROGNAME = static_cast<string>(PROGNAME);
 	if(argv[1] == nullptr) {
 		cerr << PROGNAME << " usage: ./hw3 [FILE] [DIRECTORY]\n";
 		return 1;
@@ -35,6 +37,7 @@ int main(int argc, char* argv[]) {
 	// Create an array containing each directory/file
 	vector<Path> paths;
 	for(int i = 2; i < argc; i++) {
+        string str(argv[i]);
 		Path path(argv[i]);
 		paths.push_back(path);
 	}
@@ -71,7 +74,7 @@ int main(int argc, char* argv[]) {
                     cout << currentPath.group_UID_;
                 }
                 else if(tokens[i] == 'G') {
-                    cout << curentPath.group_NAME_;
+                    cout << currentPath.group_NAME_;
                 }
                 else if(tokens[i] == 's') {
                     cout << currentPath.size_;

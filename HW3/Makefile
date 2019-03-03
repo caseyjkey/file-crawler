@@ -15,13 +15,15 @@ export opts=-D_FORTIFY_SOURCE=2 -fno-diagnostics-show-option		\
     -Werror -Wextra -Wfatal-errors -Winit-self -Wlogical-op		\
     -Wold-style-cast -Wpedantic -Wshadow -Wunused-const-variable=1	\
     -Wzero-as-null-pointer-constant
-CXXFLAGS=-Wall -DDEBUG $$opts
+CXXFLAGS=-Wall -DDEBUG -I $$opts
 # Use CXXFLAGS; not CPPFLAGS.  CXX is for C++, CPP is for the C Pre-Processor.
 
 assignment=hw3
 
-$(assignment): $(assignment).o
-	g++ $(CXXFLAGS) -o $@ $^
+$(assignment): $(assignment).o path.o
+	g++ $(CXXFLAGS) path.o -o $@ $^
+path.0: path.cc path.h
+	g++ $(CXXFLAGS) -c path.cc
 tar:
 	tar -cv $(MAKEFILE_LIST) *.cc $(wildcard *.h) >$(assignment).tar
 
