@@ -1,40 +1,41 @@
 #ifndef PATH_H
 #define PATH_H
-#include string
+#include <string>
 #include <sys/stat.h>
-#include <vector.h>
+#include <vector>
 #include <pwd.h>
 #include <grp.h>
+using namespace std;
 
-class Path (
+class Path {
     public:
-        Path(string path_);
-        int user_UID(std::string);
+        Path(string);
+        static vector< pair<string, string> > mediaTypes;
+        static vector<pair<string, string>> readMediaTypeFile(string);
+        int user_UID(string);
         int user_UID(struct stat &);
-        std::string path();
-        std::string user_NAME(int);
-        int group_UID(struct stat);
-        std::string group_NAME(int gid);
-        int permissions(struct stat&, std::string &);
-        int size(struct stat);
-        std::string time(struct stat, bool, bool, bool);
-        vector<std::pair<std::string, std::string>> readMediaTypeFile(std::string);
-        std::string inttohex(int);
-        std::string readMagicNumber(std::string);
-        std::string findMediaType(std::string, std::vector< pair<string, string> >);
+        string user_NAME(int);
+        int group_UID(struct stat &);
+        string group_NAME(int);
+        int permissions(struct stat&, string &);
+        int size(struct stat &);
+        string time(struct stat &, bool, bool, bool);
+        string inttohex(int);
+        string readMagicNumber(string);
+        string findMediaType(string, vector< pair<string, string> >);
     private:
-        std::string path_;
-        std::string type_;
+        string path_;
+        string type_;
         int user_UID_;
-        std::string permissions_;
-        std::string group_NAME_;
-        int group_UID_
-        std::string user_NAME_;
+        string permissions_;
+        string group_NAME_;
+        int group_UID_;
+        string user_NAME_;
         int access_time_;
         int mod_time_;
         int status_time_;
 };
 
-#endif PATH_H
+#endif
 
 

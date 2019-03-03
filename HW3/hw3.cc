@@ -1,5 +1,5 @@
 #include "path.h"
-
+#include <iostream>
 using namespace std;
 
 static string PROGNAME;
@@ -17,9 +17,9 @@ vector<string> parseFormatString(string str, int len) {
 
 
 // Start of HW3, TODO: Section out homeworks into seperate classes.
-void printContents(Path path) {
+//void printContents(Path path) {
 	//if(findMediaType(string magicNum, vector< 
-}
+//}
 
 
 int main(int argc, char* argv[]) {
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 	//vector<string> tokens = parseFormatString(argv[1], 1);
 
 	// Create an array containing each directory/file
-	vector<string> paths;
+	vector<Path> paths;
 	for(int i = 2; i < argc; i++) {
 		Path path(argv[i]);
 		paths.push_back(path);
@@ -41,11 +41,10 @@ int main(int argc, char* argv[]) {
 	
 	// Determine the media types of files
 	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
-        string dir = csDir + "/pub/media-types";
-        vector< pair<string, string> > mediaTypes = readMediaTypeFile(dir);
+    string dir = csDir + "/pub/media-types";
+    Path::mediaTypes = Path::readMediaTypeFile(dir);
 	
 	
-	struct stat statbuf;
 	for(auto path : paths) {
         Path currentPath(path);
 		// https://bit.ly/2SdYo4G
@@ -54,46 +53,44 @@ int main(int argc, char* argv[]) {
 			if( tokens[i] != '%') {
                 		cout << tokens[i];
             		}
-                	else {
-                	++i;
+            else {
+                ++i;
                 if(tokens[i] == 'n') {
-                    cout << path;
+                    cout << path.path_;
                 }
                 else if(tokens[i] == 'p') {
-                    string output;
-                    permissions(statbuf, output);
-                    cout << output;
+                    cout << currentPath.permissions_;
                 }
                 else if(tokens[i] == 'u') {
-                    cout << user_UID(statbuf);
+                    cout << currentPath.user_UID_;
                 }
                 else if(tokens[i] == 'U') {
-                    cout << user_NAME(user_UID(statbuf));
+                    cout << currentPath.user_NAME_;
                 }
                 else if(tokens[i] == 'g') {
-                    cout << group_UID(statbuf);
+                    cout << currentPath.group_UID_;
                 }
                 else if(tokens[i] == 'G') {
-                    cout << group_NAME(group_UID(statbuf));
+                    cout << curentPath.group_NAME_;
                 }
                 else if(tokens[i] == 's') {
-                    cout << size(statbuf);
+                    cout << currentPath.size_;
                 }
                 else if(tokens[i] == 'a') {
-                    cout << time(statbuf, 1, 0, 0);
+                    cout << currentPath.access_time_;
                 }
                 else if(tokens[i] == 'm') {
-                    cout << time(statbuf, 0, 1, 0);
+                    cout << currentPath.mod_time_;
                 }
                 else if(tokens[i] == 'c') {
-                    cout << time(statbuf, 0, 0, 1);
+                    cout << currentPath.status_time_;
                 }
                 else if(tokens[i] == 'M') {
                     cout << currentPath.type_;
                 }
-                }
             }
-            cout << endl;
+        }
+        cout << endl;
     }
     return 0;
 }

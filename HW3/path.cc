@@ -7,7 +7,7 @@ using namespace std;
 
 class Path (
     public:
-        static vector< pair<string, string> > media_types;
+        static vector< pair<string, string> > mediaTypes;
         Path(string path) {
             // Open a statbuf
             struct stat statbuf;
@@ -27,6 +27,7 @@ class Path (
             user_NAME_   = user_NAME(user_UID);
             group_NAME_  = group_NAME(user_UID);
             type_        = findMediaType(magicNum, mediaTypes);
+                           permissions(statbuf, permissions_);
         }
         
     private:
@@ -101,7 +102,7 @@ class Path (
             string timeOutput(buf);
             return timeOutput;
         }
-        vector< pair<string, string> > readMediaTypeFile(string dir) {
+        static vector< pair<string, string> > readMediaTypeFile(string dir) {
             vector< pair <string, string> > mediaTypes;
             ifstream inFile;
             inFile.open(dir);
@@ -171,7 +172,7 @@ class Path (
         int user_UID_;
         string permissions_;
         string group_NAME_;
-        int group_UID_
+        int group_UID_;
         string user_NAME_;
         
 }
