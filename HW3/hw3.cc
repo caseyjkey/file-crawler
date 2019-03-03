@@ -16,10 +16,9 @@ vector<string> parseFormatString(string str, int len) {
 }
 
 
-
 // Start of HW3, TODO: Section out homeworks into seperate classes.
 void printContents(Path path) {
-	if(findMediaType(string magicNum, vector< 
+	//if(findMediaType(string magicNum, vector< 
 }
 
 
@@ -34,10 +33,10 @@ int main(int argc, char* argv[]) {
 	//vector<string> tokens = parseFormatString(argv[1], 1);
 
 	// Create an array containing each directory/file
-	vector<string> directories;
+	vector<string> paths;
 	for(int i = 2; i < argc; i++) {
-		string elem(argv[i]);
-		directories.push_back(elem);
+		Path path(argv[i]);
+		paths.push_back(path);
 	}
 	
 	// Determine the media types of files
@@ -47,7 +46,7 @@ int main(int argc, char* argv[]) {
 	
 	
 	struct stat statbuf;
-	for(auto path : directory) {
+	for(auto path : paths) {
         Path currentPath(path);
 		// https://bit.ly/2SdYo4G
 		string tokens = string(argv[1]);

@@ -7,7 +7,7 @@ using namespace std;
 
 class Path (
     public:
-        static media_types_dir
+        static vector< pair<string, string> > media_types;
         Path(string path) {
             // Open a statbuf
             struct stat statbuf;
