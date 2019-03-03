@@ -5,7 +5,6 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <map>
 #include <pwd.h>
 #include <grp.h>
 
@@ -176,6 +175,10 @@ string findMediaType(string magicNum, vector< pair<string, string> > MediaTypes,
 	return "application/octet-data";
 }
 
+// Start of HW3, TODO: Section out homeworks into seperate classes.
+
+
+
 int main(int argc, char* argv[]) {
     PROGNAME = argv[0];
 	if(argv[1] == nullptr) {
@@ -187,23 +190,23 @@ int main(int argc, char* argv[]) {
 	//vector<string> tokens = parseFormatString(argv[1], 1);
 
 	// Create an array containing each directory/file
-	vector<string> directory;
+	vector<string> directories;
 	for(int i = 2; i < argc; i++) {
 		string elem(argv[i]);
-		directory.push_back(elem);
+		directories.push_back(elem);
 	}
 	
 	// Determine the media types of files
-	const string csDir = getpwnam("cs253") -> pw_dir;
+	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
         string dir = csDir + "/pub/media-types";
         vector< pair<string, string> > mediaTypes = readMediaTypeFile(dir);
 	
 	
 	struct stat statbuf;
-	for(auto file : directory) {
-        int openFile = lstat(file.c_str(), &statbuf);
+	for(auto path : directory) {
+        int openFile = lstat(path.c_str(), &statbuf);
 		if (openFile != 0) {
-			cerr << PROGNAME << ": cannot access '" << file << "': No such file or directory\n";
+			cerr << PROGNAME << ": cannot access '" << path << "': No such file or directory\n";
 			continue;
 		}
 		// https://bit.ly/2SdYo4G
@@ -215,7 +218,7 @@ int main(int argc, char* argv[]) {
                 	else {
                 	++i;
                 if(tokens[i] == 'n') {
-                    cout << file;
+                    cout << path;
                 }
                 else if(tokens[i] == 'p') {
                     string output;
@@ -247,8 +250,7 @@ int main(int argc, char* argv[]) {
                     cout << time(statbuf, 0, 0, 1);
                 }
                 else if(tokens[i] == 'M') {
-                    //cout << "Magic number: " << readMagicNumber(file) << "\n";
-                    cout << findMediaType(readMagicNumber(file), mediaTypes, statbuf);
+                    cout << findMediaType(readMagicNumber(path), mediaTypes, statbuf);
                 }
                 }
             }
