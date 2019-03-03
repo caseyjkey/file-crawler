@@ -3,7 +3,6 @@
 #include <string>
 using namespace std;
 
-static string PROGNAME;
  //corn fritters, georgia
 
 vector<string> parseFormatString(string str, int len) {
@@ -19,9 +18,11 @@ vector<string> parseFormatString(string str, int len) {
 
 // Start of HW3, TODO: Section out homeworks into seperate classes.
 //void printContents(Path path) {
-	//if(findMediaType(string magicNum, vector< 
+	//if(findMediaType(string magicNum, vector<
 //}
 
+static string PROGNAME;
+string Path::PROGNAME = "null";
 
 int main(int argc, char* argv[]) {
     PROGNAME = argv[0];
@@ -41,13 +42,13 @@ int main(int argc, char* argv[]) {
 		Path path(argv[i]);
 		paths.push_back(path);
 	}
-	
+
 	// Determine the media types of files
 	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
     string dir = csDir + "/pub/media-types";
     Path::mediaTypes = Path::readMediaTypeFile(dir);
-	
-	
+
+
 	for(auto path : paths) {
         Path currentPath(path);
 		// https://bit.ly/2SdYo4G
