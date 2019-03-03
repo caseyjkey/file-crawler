@@ -1,19 +1,9 @@
-#include <iostream>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <pwd.h>
-#include <grp.h>
+#include "path.h"
 
 using namespace std;
 
 static string PROGNAME;
- //corn fritters
-
-
+ //corn fritters, georgia
 
 vector<string> parseFormatString(string str, int len) {
 	vector<string> tokens;
@@ -58,11 +48,7 @@ int main(int argc, char* argv[]) {
 	
 	struct stat statbuf;
 	for(auto path : directory) {
-        int openFile = lstat(path.c_str(), &statbuf);
-		if (openFile != 0) {
-			cerr << PROGNAME << ": cannot access '" << path << "': No such file or directory\n";
-			continue;
-		}
+        Path currentPath(path);
 		// https://bit.ly/2SdYo4G
 		string tokens = string(argv[1]);
 		for(string::size_type i = 0; i < tokens.size(); ++i) {
@@ -104,7 +90,7 @@ int main(int argc, char* argv[]) {
                     cout << time(statbuf, 0, 0, 1);
                 }
                 else if(tokens[i] == 'M') {
-                    cout << findMediaType(readMagicNumber(path), mediaTypes, statbuf);
+                    cout << currentPath.type_;
                 }
                 }
             }
