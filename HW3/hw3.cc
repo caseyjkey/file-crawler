@@ -111,21 +111,6 @@ vector<string> parseFormatString(string str, int len) {
 	}
 	return tokens;
 }
-/*
-map<string, string> readMediaTypeFile(string dir) {
-	map<string, string> mediaTypes;
-	ifstream inFile;
-	inFile.open(dir);
-	string token;
-	pair<string, string> mediaEntry;
-	while(inFile >> token) {
-		mediaEntry.first = token;
-		inFile >> token;
-		mediaEntry.second = token;
-		mediaTypes.insert(mediaEntry);
-	}
-	return mediaTypes;
-} */
 
 vector< pair<string, string> > readMediaTypeFile(string dir) {
 	vector< pair <string, string> > mediaTypes;
@@ -171,23 +156,6 @@ string readMagicNumber(string dir) {
 	return magicNum;
 }
 
-/*
-string findMediaType(string magicNum, map<string, string> MediaTypes) {
-	bool match;
-	for(auto& elem : MediaTypes) {
-		match = 0;
-		for(unsigned int i = 0; i < elem.first.length(); i++) {
-			if(magicNum[i] == elem.first[i]) {
-				debug << "\n" << magicNum[i] << " and " << elem.first[i] << "\n";
-				match = 1;
-			}
-		}
-		debug << match;
-		if(match) return elem.second;
-	}
-	return "application/octet-data";
-} */
-
 
 string findMediaType(string magicNum, vector< pair<string, string> > MediaTypes, struct stat &statbuf) {
 	if(S_ISDIR(statbuf.st_mode)) return "inode/directory";
@@ -226,10 +194,9 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// Determine the media types of files
-    const string csDir = getpwnam("cs253") -> pw_dir;
-    string dir = csDir + "/pub/media-types";
-	//map<string, string> mediaTypes = readMediaTypeFile(dir);
-    vector< pair<string, string> > mediaTypes = readMediaTypeFile(dir);
+	const string csDir = getpwnam("cs253") -> pw_dir;
+        string dir = csDir + "/pub/media-types";
+        vector< pair<string, string> > mediaTypes = readMediaTypeFile(dir);
 	
 	
 	struct stat statbuf;
@@ -242,11 +209,11 @@ int main(int argc, char* argv[]) {
 		// https://bit.ly/2SdYo4G
 		string tokens = string(argv[1]);
 		for(string::size_type i = 0; i < tokens.size(); ++i) {
-            if( tokens[i] != '%') {
-                cout << tokens[i];
-            }
-            else {
-                ++i;
+			if( tokens[i] != '%') {
+                		cout << tokens[i];
+            		}
+                	else {
+                	++i;
                 if(tokens[i] == 'n') {
                     cout << file;
                 }
@@ -287,11 +254,5 @@ int main(int argc, char* argv[]) {
             }
             cout << endl;
     }
-    //for(auto& elem : mediaTypes) {
-	//	cout << elem.first << " | " << elem.second << "\n";
-	//}
     return 0;
 }
-	
-	
-    
