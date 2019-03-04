@@ -7,14 +7,52 @@ using namespace std;
  //corn fritters, georgia
 
 vector<string> parseFormatString(string str, int len) {
-	vector<string> tokens;
-	size_t pos = 0;
-	while ((pos = str.find('%')) != string::npos) {
-		tokens.push_back(str.substr(pos+1, len));
-		str.erase(pos, 1);
-	}
-	return tokens;
+    string tokens = string(argv[1]);
+    for(string::size_type i = 0; i < tokens.size(); ++i) {
+        if( tokens[i] != '%') {
+                    cout << tokens[i];
+                }
+        else {
+            ++i;
+            if(tokens[i] == 'n') {
+                cout << path.path_;
+            }
+            else if(tokens[i] == 'p') {
+                cout << currentPath.permissions_;
+            }
+            else if(tokens[i] == 'u') {
+                cout << currentPath.user_UID_;
+            }
+            else if(tokens[i] == 'U') {
+                cout << currentPath.user_NAME_;
+            }
+            else if(tokens[i] == 'g') {
+                cout << currentPath.group_UID_;
+            }
+            else if(tokens[i] == 'G') {
+                cout << currentPath.group_NAME_;
+            }
+            else if(tokens[i] == 's') {
+                cout << currentPath.size_;
+            }
+            else if(tokens[i] == 'a') {
+                cout << currentPath.access_time_;
+            }
+            else if(tokens[i] == 'm') {
+                cout << currentPath.mod_time_;
+            }
+            else if(tokens[i] == 'c') {
+                cout << currentPath.status_time_;
+            }
+            else if(tokens[i] == 'M') {
+                cout << currentPath.type_;
+            }
+        }
+    }
 }
+
+
+        
 
 
 // Start of HW3, TODO: Section out homeworks into seperate classes.
@@ -90,50 +128,7 @@ int main(int argc, char* argv[]) {
         Path currentPath(path);
         if(currentPath.isNull_) continue;
 
-
-
-		string tokens = string(argv[1]);
-		for(string::size_type i = 0; i < tokens.size(); ++i) {
-			if( tokens[i] != '%') {
-                		cout << tokens[i];
-            		}
-            else {
-                ++i;
-                if(tokens[i] == 'n') {
-                    cout << path.path_;
-                }
-                else if(tokens[i] == 'p') {
-                    cout << currentPath.permissions_;
-                }
-                else if(tokens[i] == 'u') {
-                    cout << currentPath.user_UID_;
-                }
-                else if(tokens[i] == 'U') {
-                    cout << currentPath.user_NAME_;
-                }
-                else if(tokens[i] == 'g') {
-                    cout << currentPath.group_UID_;
-                }
-                else if(tokens[i] == 'G') {
-                    cout << currentPath.group_NAME_;
-                }
-                else if(tokens[i] == 's') {
-                    cout << currentPath.size_;
-                }
-                else if(tokens[i] == 'a') {
-                    cout << currentPath.access_time_;
-                }
-                else if(tokens[i] == 'm') {
-                    cout << currentPath.mod_time_;
-                }
-                else if(tokens[i] == 'c') {
-                    cout << currentPath.status_time_;
-                }
-                else if(tokens[i] == 'M') {
-                    cout << currentPath.type_;
-                }
-            }
-        }
+		
         cout << endl;
     }
     return 0;
