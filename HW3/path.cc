@@ -21,6 +21,7 @@ Path::Path(char* path) {
                 return;
             }
             // Begin assigning values to attributes
+            mediaTypes   = readMediaTypeFile(path);
             path_        = path;
             access_time_ = time(statbuf, 1, 0, 0);
             mod_time_    = time(statbuf, 0, 1, 0);

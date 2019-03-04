@@ -13,8 +13,8 @@ class Path {
     public:
         Path(char*);
         static string PROGNAME;
-        static vector< pair<string, string> > mediaTypes;
-        static vector<pair<string, string>> readMediaTypeFile(string);
+        vector< pair<string, string> > mediaTypes;
+        vector<pair<string, string>> readMediaTypeFile(string);
         int user_UID(string);
         int user_UID(struct stat &);
         string user_NAME(int);
