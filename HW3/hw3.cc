@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 		cerr << PROGNAME << " usage: ./hw3 [FILE] [DIRECTORY]\n";
 		return 1;
 	}
-
+    cout << "why segfault tho?" << endl;
 	// Read the flags
 	//vector<string> tokens = parseFormatString(argv[1], 1);
 
@@ -39,18 +39,63 @@ int main(int argc, char* argv[]) {
 	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
     string dir = csDir + "/pub/media-types";
 
-	// Create an array containing each directory/file
+	
+    cout << "finding it" << endl;
+	int opt;
+	int aFind, mFind, fFind;
+	string magicFile, format;
+
+    aFind = 0;
+    mFind = 0;
+    fFind = 0;
+    cout << "hurr?" << endl;
+	while((opt = getopt(argc, argv, "fm::a")) != -1) {
+        cout << "eureka!" << endl;
+        switch (opt) {
+            case 'm':
+                if(mFind == 1)
+                    cerr << PROGNAME << ": error, media-type already defined." << endl;
+                else {
+                    mFind = 1;
+                    magicFile = optarg;
+                    cout << "magicFile: " << magicFile << endl;;
+                }
+                break;
+            case 'a':
+                aFind = 1;
+                break;
+            case 'f':
+                if(fFind == 1)
+                    cerr << PROGNAME << ": error, format already defined." << endl;
+                else {
+                    fFind = 1;
+                    format = optarg;
+                    cout << "magicFile: " << magicFile << endl;
+                }
+                break;
+            default:
+                cerr << "Usage: " << PROGNAME << " [-a] [-m magic-file] [-f format] path" << endl;
+                return 1;
+        }
+    }
+    
+    cout << "aFind: " << aFind << " mFind: " << mFind << " fFind: " << fFind;
+    cout << "\nformat: " << format << " magicFile: " << magicFile;
+    
+    // Create an array containing each directory/file
 	vector<Path> paths;
 	for(int i = 2; i < argc; i++) {
         string str(argv[i]);
 		Path path(argv[i], dir);
 		paths.push_back(path);
 	}
-
+    
 	for(auto path : paths) {
         Path currentPath(path);
         if(currentPath.isNull_) continue;
-		// https://bit.ly/2SdYo4G
+
+
+
 		string tokens = string(argv[1]);
 		for(string::size_type i = 0; i < tokens.size(); ++i) {
 			if( tokens[i] != '%') {
