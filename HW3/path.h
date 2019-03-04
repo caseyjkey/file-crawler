@@ -11,7 +11,7 @@ using namespace std;
 
 class Path {
     public:
-        Path(char*);
+        Path(char*, string);
         static string PROGNAME;
         vector< pair<string, string> > mediaTypes;
         vector<pair<string, string>> readMediaTypeFile(string);

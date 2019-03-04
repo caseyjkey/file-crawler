@@ -34,18 +34,19 @@ int main(int argc, char* argv[]) {
 	// Read the flags
 	//vector<string> tokens = parseFormatString(argv[1], 1);
 
+	// Determine the media types of files
+	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
+    string dir = csDir + "/pub/media-types";
+
 	// Create an array containing each directory/file
 	vector<Path> paths;
 	for(int i = 2; i < argc; i++) {
         string str(argv[i]);
-		Path path(argv[i]);
+		Path path(argv[i], dir);
 		paths.push_back(path);
 	}
 
-	// Determine the media types of files
-	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
-    string dir = csDir + "/pub/media-types";
-    Path::mediaTypes = Path::readMediaTypeFile(dir);
+
 
 
 	for(auto path : paths) {
