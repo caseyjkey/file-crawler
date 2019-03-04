@@ -1,5 +1,6 @@
 #ifndef PATH_H
 #define PATH_H
+
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -21,10 +22,12 @@ class Path {
         string group_NAME(int);
         int permissions(struct stat &, string &);
         int size(struct stat &);
+        void isNull(bool);
+        bool isNull_;
         string time(struct stat &, bool, bool, bool);
         string inttohex(int);
         string readMagicNumber(string);
-        string findMediaType(string, vector< pair<string, string> >);
+        string findMediaType(string, vector< pair<string, string> >, struct stat &);
         string path_;
         string type_;
         int user_UID_;
@@ -32,10 +35,11 @@ class Path {
         string group_NAME_;
         int group_UID_;
         string user_NAME_;
-        int access_time_;
-        int mod_time_;
-        int status_time_;
-        int size_;
+        string access_time_;
+        string mod_time_;
+        string status_time_;
+        string size_;
+        string magic_num_;
 };
 
 #endif

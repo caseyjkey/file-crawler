@@ -22,7 +22,6 @@ vector<string> parseFormatString(string str, int len) {
 //}
 
 static string PROGNAME;
-string Path::PROGNAME = "null";
 
 int main(int argc, char* argv[]) {
     PROGNAME = argv[0];

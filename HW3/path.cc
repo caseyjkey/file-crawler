@@ -1,6 +1,8 @@
-#include <iostream>
+#include "path.h"
+
+#include <iostream>           // For cerr
 #include <sys/types.h>
-#include <fstream>
+#include <fstream>            // For ifstream
 #include <sstream>
 #include <vector>
 #include <sys/stat.h>
@@ -15,7 +17,7 @@ Path::Path(char* path) {
             int openFile = lstat(path, &statbuf);
             if(openFile != 0) {
                 cerr << PROGNAME << ": cannot access'" << path << "': No such file or directory\n";
-               // isNull(true);
+                isNull(true);
                 return;
             }
             // Begin assigning values to attributes
@@ -27,14 +29,14 @@ Path::Path(char* path) {
             group_UID_   = group_UID(statbuf);
             user_NAME_   = user_NAME(user_UID_);
             group_NAME_  = group_NAME(group_UID_);
-            magic_num_ = readMagicNumber(path_);
+            magic_num_   = readMagicNumber(path_);
             type_        = findMediaType(magic_num_, mediaTypes, statbuf);
             size_        = size(statbuf);
 
             permissions(statbuf, permissions_);
 }
 
-static vector< pair<string, string> > Path::readMediaTypeFile(string dir) {
+vector< pair<string, string> > Path::readMediaTypeFile(string dir) {
     ifstream inFile;
     inFile.open(dir);
     string token;
@@ -165,10 +167,6 @@ string Path::findMediaType(string magicNum, vector< pair<string, string> > Media
     }
     return "application/octet-data";
 }
-
-
-
-};
 
 
 
