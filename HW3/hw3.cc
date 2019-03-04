@@ -31,7 +31,6 @@ int main(int argc, char* argv[]) {
 		cerr << PROGNAME << " usage: ./hw3 [FILE] [DIRECTORY]\n";
 		return 1;
 	}
-    cout << "why segfault tho?" << endl;
 	// Read the flags
 	//vector<string> tokens = parseFormatString(argv[1], 1);
 
@@ -40,7 +39,6 @@ int main(int argc, char* argv[]) {
     string dir = csDir + "/pub/media-types";
 
 	
-    cout << "finding it" << endl;
 	int opt;
 	int aFind, mFind, fFind;
 	string magicFile, format;
@@ -48,9 +46,7 @@ int main(int argc, char* argv[]) {
     aFind = 0;
     mFind = 0;
     fFind = 0;
-    cout << "hurr?" << endl;
-	while((opt = getopt(argc, argv, "fm::a")) != -1) {
-        cout << "eureka!" << endl;
+	while((opt = getopt(argc, argv, "am:f:")) != -1) {
         switch (opt) {
             case 'm':
                 if(mFind == 1)
@@ -58,7 +54,7 @@ int main(int argc, char* argv[]) {
                 else {
                     mFind = 1;
                     magicFile = optarg;
-                    cout << "magicFile: " << magicFile << endl;;
+                    cout << "magicFile: " << magicFile << endl;
                 }
                 break;
             case 'a':
@@ -79,8 +75,8 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    cout << "aFind: " << aFind << " mFind: " << mFind << " fFind: " << fFind;
-    cout << "\nformat: " << format << " magicFile: " << magicFile;
+    cout << "aFind: " << aFind << " mFind: " << mFind << " fFind: " << fFind << "\n";
+    cout << "\nformat: " << format << " magicFile: " << magicFile << "\n";
     
     // Create an array containing each directory/file
 	vector<Path> paths;
