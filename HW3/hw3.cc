@@ -1,6 +1,7 @@
 #include "path.h"
 #include <iostream>
 #include <string>
+#include <unistd.h>     // For getopt()
 using namespace std;
 
  //corn fritters, georgia
@@ -46,11 +47,9 @@ int main(int argc, char* argv[]) {
 		paths.push_back(path);
 	}
 
-
-
-
 	for(auto path : paths) {
         Path currentPath(path);
+        if(currentPath.isNull_) continue;
 		// https://bit.ly/2SdYo4G
 		string tokens = string(argv[1]);
 		for(string::size_type i = 0; i < tokens.size(); ++i) {

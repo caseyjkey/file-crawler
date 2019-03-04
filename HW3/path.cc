@@ -16,11 +16,13 @@ Path::Path(char* path, string dir) {
             struct stat statbuf;
             int openFile = lstat(path, &statbuf);
             if(openFile != 0) {
-                cerr << PROGNAME << ": cannot access'" << path << "': No such file or directory\n";
+                cerr << PROGNAME << ": cannot access '" << path << "': No such file or directory\n";
                 isNull(true);
                 return;
             }
+            //cout << "size: " << statbuf.st_size;
             // Begin assigning values to attributes
+            size_        = statbuf.st_size;
             mediaTypes   = readMediaTypeFile(dir);
             path_        = path;
             access_time_ = time(statbuf, 1, 0, 0);
@@ -32,7 +34,7 @@ Path::Path(char* path, string dir) {
             group_NAME_  = group_NAME(group_UID_);
             magic_num_   = readMagicNumber(path_);
             type_        = findMediaType(magic_num_, mediaTypes, statbuf);
-            size_        = size(statbuf);
+             //sizePath(statbuf);
 
             permissions(statbuf, permissions_);
 }
@@ -102,7 +104,7 @@ int Path::permissions(struct stat &statbuf, string &output) {
     output = os.str();
     return 0;
 }
-int Path::size(struct stat &statbuf) {
+int Path::sizePath(struct stat &statbuf) {
     return statbuf.st_size;
 }
 string Path::time(struct stat &statbuf, bool access = 0, bool mod = 1, bool status = 0) {
@@ -154,7 +156,7 @@ string Path::readMagicNumber(string dir) {
 string Path::findMediaType(string magicNum, vector< pair<string, string> > MediaTypes, struct stat &statbuf) {
     if(S_ISDIR(statbuf.st_mode)) return "inode/directory";
     if(S_ISLNK(statbuf.st_mode)) return "inode/symlink";
-    if(size(statbuf) == 0) return "inode/empty";
+    if(sizePath(statbuf) == 0) return "inode/empty";
     bool match;
     for(auto& elem : MediaTypes) {
         match = 1;

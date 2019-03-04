@@ -21,7 +21,7 @@ class Path {
         int group_UID(struct stat &);
         string group_NAME(int);
         int permissions(struct stat &, string &);
-        int size(struct stat &);
+        int sizePath(struct stat &);
         void isNull(bool);
         bool isNull_;
         string time(struct stat &, bool, bool, bool);
@@ -38,7 +38,7 @@ class Path {
         string access_time_;
         string mod_time_;
         string status_time_;
-        string size_;
+        off_t size_;
         string magic_num_;
 };
 
