@@ -6,8 +6,9 @@ using namespace std;
 
  //corn fritters, georgia
 
-vector<string> parseFormatString(string str, int len) {
-    string tokens = string(argv[1]);
+static string PROGNAME;
+
+void processFormatString(string tokens, Path currentPath) {
     for(string::size_type i = 0; i < tokens.size(); ++i) {
         if( tokens[i] != '%') {
                     cout << tokens[i];
@@ -15,7 +16,7 @@ vector<string> parseFormatString(string str, int len) {
         else {
             ++i;
             if(tokens[i] == 'n') {
-                cout << path.path_;
+                cout << currentPath.path_;
             }
             else if(tokens[i] == 'p') {
                 cout << currentPath.permissions_;
@@ -52,35 +53,9 @@ vector<string> parseFormatString(string str, int len) {
 }
 
 
-        
-
-
-// Start of HW3, TODO: Section out homeworks into seperate classes.
-//void printContents(Path path) {
-	//if(findMediaType(string magicNum, vector<
-//}
-
-static string PROGNAME;
-
-int main(int argc, char* argv[]) {
-    PROGNAME = argv[0];
-    Path::PROGNAME = static_cast<string>(PROGNAME);
-	if(argv[1] == nullptr) {
-		cerr << PROGNAME << " usage: ./hw3 [FILE] [DIRECTORY]\n";
-		return 1;
-	}
-	// Read the flags
-	//vector<string> tokens = parseFormatString(argv[1], 1);
-
-	// Determine the media types of files
-	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
-    string dir = csDir + "/pub/media-types";
-
-	
-	int opt;
+int processOpts(string &format, string &magicFile) {
+    int opt;
 	int aFind, mFind, fFind;
-	string magicFile, format;
-
     aFind = 0;
     mFind = 0;
     fFind = 0;
@@ -112,9 +87,38 @@ int main(int argc, char* argv[]) {
                 return 1;
         }
     }
+}
+
+
+// Start of HW3, TODO: Section out homeworks into seperate classes.
+//void printContents(Path path) {
+	//if(findMediaType(string magicNum, vector<
+//}
+
+
+
+int main(int argc, char* argv[]) {
+    PROGNAME = argv[0];
+    Path::PROGNAME = static_cast<string>(PROGNAME);
+	if(argv[1] == nullptr) {
+		cerr << PROGNAME << " usage: ./hw3 [FILE] [DIRECTORY]\n";
+		return 1;
+	}
+	// Read the flags
+	//vector<string> tokens = parseFormatString(argv[1], 1);
+
+	// Determine the media types of files
+	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
+    string dir = csDir + "/pub/media-types";
+
+	
+
+	string format, magicFile;
+    processOpts(format, magicFile);
     
-    cout << "aFind: " << aFind << " mFind: " << mFind << " fFind: " << fFind << "\n";
-    cout << "\nformat: " << format << " magicFile: " << magicFile << "\n";
+    
+    //cout << "aFind: " << aFind << "\n";
+    //cout << "\nformat: " << format << " magicFile: " << magicFile << "\n";
     
     // Create an array containing each directory/file
 	vector<Path> paths;
@@ -127,7 +131,7 @@ int main(int argc, char* argv[]) {
 	for(auto path : paths) {
         Path currentPath(path);
         if(currentPath.isNull_) continue;
-
+        processFormatString(format, path);
 		
         cout << endl;
     }
