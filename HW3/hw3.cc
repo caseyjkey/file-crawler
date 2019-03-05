@@ -1,9 +1,9 @@
 #include "path.h"
 #include <unistd.h>     // For getopt() and getcwd
-#include <dirent.h>
+#include <dirent.h>     // For readDir()
 #include <iostream>
 #include <string>
-#include <sstream>
+#include <sstream>      // For ostringstream
 using namespace std;
 
  //corn fritters, georgia
@@ -53,47 +53,51 @@ void processFormatString(string tokens, Path currentPath) {
 }
 
 
-Path traverse(Path path, string magicDir, string format) {
+Path traverse(Path path, string magicDir, string format, int aFind) {
     DIR *dir;
     struct dirent *entry;
     struct stat info;
     
     ostringstream nextFn;
-    //cout << "path type: " << path.type_;
     if(path.type_ == "inode/directory") {
-        //cout << "is a directory\n";
         if((dir = opendir(path.path_.c_str())) == NULL)
             cerr << Path::PROGNAME << ": " << path.path_ << " opendir() error\n";
         else {
             while((entry = readdir(dir)) != NULL) {
                 nextFn.str("");
                 nextFn.clear();
-                //cout << "inside while\n";
-                if((entry -> d_name[0]) != '.') {
-                    //cout << "inside d_name\n";
+                if( aFind == 1) {
+                    if (*entry -> d_name != '.') { 
+                    nextFn << path.path_ << "/" << entry->d_name;
+                    Path newEntry = path.addEntry(nextFn.str(), magicDir);
+                    cout << "\n";
+                    processFormatString(format, newEntry);
+                    if (stat(nextFn.str().c_str(), &info) != 0) 
+                        cerr << Path::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
+                    else if (S_ISDIR(info.st_mode))
+                        traverse(Path(nextFn.str(), magicDir), magicDir, format, aFind);
+                    }
+                }
+                else {
+                    if ((entry -> d_name[0]) != '.') {
+ 
                     nextFn << path.path_ << "/" << entry->d_name;
                     
                     Path newEntry = path.addEntry(nextFn.str(), magicDir);
                     cout << "\n";
                     processFormatString(format, newEntry);
-                    //cout << "\nnewEntry path: " << newEntry.path_ << "\n";
                     if (stat(nextFn.str().c_str(), &info) != 0) 
                         cerr << Path::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
                     else if (S_ISDIR(info.st_mode))
-                        traverse(Path(nextFn.str(), magicDir), magicDir, format);
+                        traverse(Path(nextFn.str(), magicDir), magicDir, format, aFind);
+                    }
                 }
-                
             }
+            closedir(dir);
         }
     }
     return path;
 }
-
-
-// Start of HW3, TODO: Section out homeworks into seperate classes.
-//void printContents(Path path) {
-	//if(findMediaType(string magicNum, vector<
-//}
 
 static string PROGNAME;
 
@@ -104,13 +108,12 @@ int main(int argc, char* argv[]) {
 		cerr << PROGNAME << " usage: ./hw3 [FILE] [DIRECTORY]\n";
 		return 1;
 	}
-	// Read the flags
-	//vector<string> tokens = parseFormatString(argv[1], 1);
 
-	// Determine the media types of files
+	// ------------------- Default magic-file ------------------------------ 
 	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
     string dir = csDir + "/pub/media-types";
-
+    // ---------------------------------------------------------------------
+    
 	// ---------------- Parse command line options -------------------------
 	int opt;
 	int aFind, mFind, fFind;
@@ -122,24 +125,32 @@ int main(int argc, char* argv[]) {
 	while((opt = getopt(argc, argv, "am:f:")) != -1) {
         switch (opt) {
             case 'm':
-                if(mFind == 1)
-                    cerr << PROGNAME << ": error, media-type already defined." << endl;
+                if(mFind == 1) {
+                    cerr << PROGNAME << ": error media-type already defined\n";
+                    return 1;
+                }
                 else {
                     mFind = 1;
-                    magicFile = optarg;
-                    cout << "magicFile: " << magicFile << endl;
+                    dir = optarg;
+                    // Check if valid
+                    struct stat buf;
+                    if(stat(dir.c_str(), &buf) != 0) {
+                        cerr << PROGNAME << ": error '" << dir << "' can't be opened\n";
+                        return 1;
+                    }
                 }
                 break;
             case 'a':
                 aFind = 1;
                 break;
             case 'f':
-                if(fFind == 1)
-                    cerr << PROGNAME << ": error, format already defined." << endl;
+                if(fFind == 1) {
+                    cerr << PROGNAME << ": error, format already defined\n";
+                    return 1;
+                }
                 else {
                     fFind = 1;
                     format = optarg;
-                    cout << "magicFile: " << magicFile << endl;
                 }
                 break;
             default:
@@ -148,29 +159,26 @@ int main(int argc, char* argv[]) {
         }
     }
     if(fFind == 0) format = "%p %U %G %s %n";
+    // --------------------------------------------------------------------
     
-    
-    cout << "aFind: " << aFind << " optind: " << optind << "\n";
-    //cout << "\nformat: " << format << " magicFile: " << magicFile << "\n";
     // ------------------ End Parse Command Line Arguments ----------------
     
-    // Create an array containing each directory/file
+    // Create a vector containing each path passed as an argument
 	vector<Path> paths;
-   // char cwd[PATH_MAX];
 	for(int i = optind; i < argc; i++) {
         string str(argv[i]);
 		Path path(str, dir);
 		paths.push_back(path);
 	}
     
+    // --------------------------------------------------------------------
    
-    
+    // ----------------- Traverse and Output Paths ------------------------
 	for(auto path : paths) {
         Path currentPath(path);
         if(currentPath.isNull_) continue;
         processFormatString(format, path);
-        path = traverse(path, dir, format);
-        //cout << "\npath.entries size: " << path.entries.size() << "\n";
+        path = traverse(path, dir, format, aFind);
         cout << endl;
     }
     return 0;
