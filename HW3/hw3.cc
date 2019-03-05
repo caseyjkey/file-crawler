@@ -153,9 +153,17 @@ int main(int argc, char* argv[]) {
     
     // Create an array containing each directory/file
 	vector<Path> paths;
+    char cwd[PATH_MAX];
 	for(int i = optind; i < argc; i++) {
         string str(argv[i]);
-		Path path(argv[i], dir);
+        if(str == ".") {
+            if(getcwd(cwd, sizeof(cwd)) != NULL) {
+                str = cwd;
+                cout << "cwd: " << str << "\n";
+            }
+        }
+            
+		Path path(str, dir);
 		paths.push_back(path);
 	}
     
