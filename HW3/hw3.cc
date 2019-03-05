@@ -59,6 +59,7 @@ Path traverse(Path path, string magicDir, string format) {
     struct stat info;
     
     ostringstream nextFn;
+    //cout << "path type: " << path.type_;
     if(path.type_ == "inode/directory") {
         //cout << "is a directory\n";
         if((dir = opendir(path.path_.c_str())) == NULL)
@@ -146,6 +147,8 @@ int main(int argc, char* argv[]) {
                 return 1;
         }
     }
+    if(fFind == 0) format = "%p %U %G %s %n";
+    
     
     cout << "aFind: " << aFind << " optind: " << optind << "\n";
     //cout << "\nformat: " << format << " magicFile: " << magicFile << "\n";
@@ -153,16 +156,9 @@ int main(int argc, char* argv[]) {
     
     // Create an array containing each directory/file
 	vector<Path> paths;
-    char cwd[PATH_MAX];
+   // char cwd[PATH_MAX];
 	for(int i = optind; i < argc; i++) {
         string str(argv[i]);
-        if(str == ".") {
-            if(getcwd(cwd, sizeof(cwd)) != NULL) {
-                str = cwd;
-                cout << "cwd: " << str << "\n";
-            }
-        }
-            
 		Path path(str, dir);
 		paths.push_back(path);
 	}
