@@ -53,30 +53,39 @@ void processFormatString(string tokens, Path currentPath) {
 }
 
 
-void traverse(Path path, string magicDir) {
+Path traverse(Path path, string magicDir, string format) {
     DIR *dir;
     struct dirent *entry;
-    int count;
     struct stat info;
     
     ostringstream nextFn;
-        if(path.path_ == "inode/directory") {
+        if(path.type_ == "inode/directory") {
+            //cout << "is a directory\n";
             if((dir = opendir(path.path_.c_str())) == NULL)
                 cerr << Path::PROGNAME << ": " << path.path_ << " opendir() error\n";
             else {
                 while((entry = readdir(dir)) != NULL) {
+                    nextFn.str("");
+                    nextFn.clear();
+                    //cout << "inside while\n";
                     if((entry -> d_name[0]) != '.') {
+                        //cout << "inside d_name\n";
                         nextFn << path.path_ << "/" << entry->d_name;
-                        path.addEntry(nextFn.str(), magicDir);
+                        
+                        Path newEntry = path.addEntry(nextFn.str(), magicDir);
+                        cout << "\n";
+                        processFormatString(format, newEntry);
+                        //cout << "\nnewEntry path: " << newEntry.path_ << "\n";
                         if (stat(nextFn.str().c_str(), &info) != 0) 
                             cerr << Path::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
                         else if (S_ISDIR(info.st_mode))
-                            traverse(Path(nextFn.str(), magicDir), magicDir);
+                            traverse(Path(nextFn.str(), magicDir), magicDir, format);
                     }
                     
                 }
             }
-        }   
+        }
+        return path;
 }
 
 
@@ -156,8 +165,8 @@ int main(int argc, char* argv[]) {
         Path currentPath(path);
         if(currentPath.isNull_) continue;
         processFormatString(format, path);
-        traverse(path, dir);
-        
+        path = traverse(path, dir, format);
+        //cout << "\npath.entries size: " << path.entries.size() << "\n";
         cout << endl;
     }
     return 0;

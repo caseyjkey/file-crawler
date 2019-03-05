@@ -43,7 +43,9 @@ string Path::PROGNAME = "hw3";
 
 Path &Path::addEntry(string path, string magic) {
     Path retVal(path, magic);
+    //cout << "adding " << retVal.path_ << "\n";
     entries.push_back(retVal);
+    //cout << "\nentries size: " << entries.size() << "\n";
     return this->entries.back();
 }
 
