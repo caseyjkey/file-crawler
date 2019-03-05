@@ -1,7 +1,8 @@
 #include "path.h"
+#include <unistd.h>     // For getopt()
+#include <dirent.h>
 #include <iostream>
 #include <string>
-#include <unistd.h>     // For getopt()
 using namespace std;
 
  //corn fritters, georgia
@@ -51,7 +52,30 @@ void processFormatString(string tokens, Path currentPath) {
 }
 
 
-        
+void traverse(string fn) {
+    DIR *dir;
+    struct dirent *entry;
+    int count;
+    struct stat info;
+    
+    ostream output;
+        if(fn == "inode/directory") {
+            if((dir = opendir(fn)) == NULL)
+                cerr << PROGNAME << ": " << fn << " opendir() error\n";
+            else {
+                while((entry = readdir(dir)) != NULL) {
+                    if((entry -> d_name[0] != '.') {
+                        output << fn << "/" << entry->d_name;
+                        if (stat(path, &info) != 0) 
+                            cerr << PROGNAME << ": stat(" << fn << ") error\n";
+                        else if (S_ISDIR(info.st_mode))
+                            
+                    }
+                    
+                }
+            }
+        }   
+}
 
 
 // Start of HW3, TODO: Section out homeworks into seperate classes.
@@ -75,7 +99,7 @@ int main(int argc, char* argv[]) {
 	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
     string dir = csDir + "/pub/media-types";
 
-	
+	// ---------------- Parse command line options -------------------------
 	int opt;
 	int aFind, mFind, fFind;
 	string magicFile, format;
@@ -114,6 +138,7 @@ int main(int argc, char* argv[]) {
     
     cout << "aFind: " << aFind << "\n";
     //cout << "\nformat: " << format << " magicFile: " << magicFile << "\n";
+    // ------------------ End Parse Command Line Arguments ----------------
     
     // Create an array containing each directory/file
 	vector<Path> paths;
@@ -123,11 +148,14 @@ int main(int argc, char* argv[]) {
 		paths.push_back(path);
 	}
     
+   
+    
 	for(auto path : paths) {
         Path currentPath(path);
         if(currentPath.isNull_) continue;
         processFormatString(format, path);
-		
+        
+        
         cout << endl;
     }
     return 0;
