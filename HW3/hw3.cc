@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <iostream>
 #include <string>
+#include <sstream>
 using namespace std;
 
  //corn fritters, georgia
@@ -52,24 +53,25 @@ void processFormatString(string tokens, Path currentPath) {
 }
 
 
-void traverse(string fn) {
+void traverse(Path path, string magicDir) {
     DIR *dir;
     struct dirent *entry;
     int count;
     struct stat info;
     
-    ostream output;
-        if(fn == "inode/directory") {
-            if((dir = opendir(fn)) == NULL)
-                cerr << PROGNAME << ": " << fn << " opendir() error\n";
+    ostringstream nextFn;
+        if(path.path_ == "inode/directory") {
+            if((dir = opendir(path.path_.c_str())) == NULL)
+                cerr << Path::PROGNAME << ": " << path.path_ << " opendir() error\n";
             else {
                 while((entry = readdir(dir)) != NULL) {
-                    if((entry -> d_name[0] != '.') {
-                        output << fn << "/" << entry->d_name;
-                        if (stat(path, &info) != 0) 
-                            cerr << PROGNAME << ": stat(" << fn << ") error\n";
+                    if((entry -> d_name[0]) != '.') {
+                        nextFn << path.path_ << "/" << entry->d_name;
+                        path.addEntry(nextFn.str(), magicDir);
+                        if (stat(path.c_str(), &info) != 0) 
+                            cerr << PROGNAME << ": stat(" << nextFn << ") error\n";
                         else if (S_ISDIR(info.st_mode))
-                            
+                            traverse(nextFn);
                     }
                     
                 }
@@ -154,7 +156,7 @@ int main(int argc, char* argv[]) {
         Path currentPath(path);
         if(currentPath.isNull_) continue;
         processFormatString(format, path);
-        
+        traverse(path, dir);
         
         cout << endl;
     }

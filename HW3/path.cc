@@ -11,7 +11,7 @@
 using namespace std;
 
 // Constructor
-Path::Path(char* path, string dir) {
+Path::Path(string path, string magic) {
             // Open a statbuf
             struct stat statbuf;
             int openFile = lstat(path, &statbuf);
@@ -20,10 +20,10 @@ Path::Path(char* path, string dir) {
                 isNull(true);
                 return;
             }
-            //cout << "size: " << statbuf.st_size;
+            
             // Begin assigning values to attributes
             size_        = statbuf.st_size;
-            mediaTypes   = readMediaTypeFile(dir);
+            mediaTypes   = readMediaTypeFile(magic);
             path_        = path;
             access_time_ = time(statbuf, 1, 0, 0);
             mod_time_    = time(statbuf, 0, 1, 0);
@@ -38,7 +38,14 @@ Path::Path(char* path, string dir) {
 
             permissions(statbuf, permissions_);
 }
+
 string Path::PROGNAME = "hw3";
+
+void Path::addEntry(string path, string magic) {
+    entries.push_back(Path::Path(path, magic));
+    return;
+}
+
 vector< pair<string, string> > Path::readMediaTypeFile(string dir) {
     ifstream inFile;
     inFile.open(dir);

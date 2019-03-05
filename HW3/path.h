@@ -11,7 +11,7 @@ using namespace std;
 
 class Path {
     public:
-        Path(char*, string);
+        Path(string, string);
         static string PROGNAME;
         vector< pair<string, string> > mediaTypes;
         vector<pair<string, string>> readMediaTypeFile(string);
@@ -23,11 +23,13 @@ class Path {
         int permissions(struct stat &, string &);
         int sizePath(struct stat &);
         void isNull(bool);
-        bool isNull_;
         string time(struct stat &, bool, bool, bool);
         string inttohex(int);
         string readMagicNumber(string);
         string findMediaType(string, vector< pair<string, string> >, struct stat &);
+        void addEntry(string, string);
+        
+        // ------------------ Path Attributes ----------------
         string path_;
         string type_;
         int user_UID_;
@@ -38,8 +40,14 @@ class Path {
         string access_time_;
         string mod_time_;
         string status_time_;
-        off_t size_;
         string magic_num_;
+        vector<Path> entries;
+        
+        // ------------------ Helper Attributes ---------------
+        bool isNull_;
+        off_t size_;
+        int numberOfEntries;
+        
 };
 
 #endif
