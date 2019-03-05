@@ -68,10 +68,10 @@ void traverse(Path path, string magicDir) {
                     if((entry -> d_name[0]) != '.') {
                         nextFn << path.path_ << "/" << entry->d_name;
                         path.addEntry(nextFn.str(), magicDir);
-                        if (stat(path.c_str(), &info) != 0) 
-                            cerr << PROGNAME << ": stat(" << nextFn << ") error\n";
+                        if (stat(nextFn.str().c_str(), &info) != 0) 
+                            cerr << Path::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
                         else if (S_ISDIR(info.st_mode))
-                            traverse(nextFn);
+                            traverse(Path(nextFn.str(), magicDir), magicDir);
                     }
                     
                 }

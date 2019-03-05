@@ -27,7 +27,7 @@ class Path {
         string inttohex(int);
         string readMagicNumber(string);
         string findMediaType(string, vector< pair<string, string> >, struct stat &);
-        void addEntry(string, string);
+        Path &addEntry(string, string);
         
         // ------------------ Path Attributes ----------------
         string path_;

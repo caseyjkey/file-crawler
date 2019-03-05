@@ -14,7 +14,7 @@ using namespace std;
 Path::Path(string path, string magic) {
             // Open a statbuf
             struct stat statbuf;
-            int openFile = lstat(path, &statbuf);
+            int openFile = lstat(path.c_str(), &statbuf);
             if(openFile != 0) {
                 cerr << PROGNAME << ": cannot access '" << path << "': No such file or directory\n";
                 isNull(true);
@@ -41,9 +41,10 @@ Path::Path(string path, string magic) {
 
 string Path::PROGNAME = "hw3";
 
-void Path::addEntry(string path, string magic) {
-    entries.push_back(Path::Path(path, magic));
-    return;
+Path &Path::addEntry(string path, string magic) {
+    Path retVal(path, magic);
+    entries.push_back(retVal);
+    return this->entries.back();
 }
 
 vector< pair<string, string> > Path::readMediaTypeFile(string dir) {
