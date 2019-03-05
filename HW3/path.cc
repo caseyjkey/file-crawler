@@ -137,6 +137,9 @@ string Path::time(struct stat &statbuf, bool access = 0, bool mod = 1, bool stat
 
 string Path::inttohex(int num) {
     // https://bit.ly/2InTEd9
+    
+    //if(num == 127) num = 137;
+    //cout << "Base 16 num: " << num << " ";
     string d = "0123456789abcdef"; //
     string res;
     while(num > 0) {
@@ -144,6 +147,7 @@ string Path::inttohex(int num) {
         num /= 16;
     }
     if(res.length() == 1) res = "0" + res;
+    //cout << "Decimal result: " << res << "\n";
     return res;
 }
 
@@ -153,13 +157,19 @@ string Path::readMagicNumber(string dir) {
     string magicNum;
     for ( int i = 0; i < 32; i++ ) {
         file.get(chrctr);
+        //if(dir == "/s/bach/a/class/cs253/pub/tree/alpha/iota/kappa")
+            //cout << "get: " << char(chrctr) << "\n";
         //cout << "character: " << chrctr << "\n";
+        
         if(chrctr < '!' || chrctr > '~') {
+            //cout << "Inside readMagicNumber if, get read: " << char(chrctr) << "\n";
             magicNum += "%" +  inttohex(chrctr);
         } else {
             magicNum += chrctr;
+            //cout << "Inside readMagicNumber else, get read: " << chrctr << "\n";
         }
     }
+    //cout << "magicNum: " << magicNum << "\n";
     return magicNum;
 }
 

@@ -1,5 +1,5 @@
 #include "path.h"
-#include <unistd.h>     // For getopt()
+#include <unistd.h>     // For getopt() and getcwd
 #include <dirent.h>
 #include <iostream>
 #include <string>
@@ -59,33 +59,33 @@ Path traverse(Path path, string magicDir, string format) {
     struct stat info;
     
     ostringstream nextFn;
-        if(path.type_ == "inode/directory") {
-            //cout << "is a directory\n";
-            if((dir = opendir(path.path_.c_str())) == NULL)
-                cerr << Path::PROGNAME << ": " << path.path_ << " opendir() error\n";
-            else {
-                while((entry = readdir(dir)) != NULL) {
-                    nextFn.str("");
-                    nextFn.clear();
-                    //cout << "inside while\n";
-                    if((entry -> d_name[0]) != '.') {
-                        //cout << "inside d_name\n";
-                        nextFn << path.path_ << "/" << entry->d_name;
-                        
-                        Path newEntry = path.addEntry(nextFn.str(), magicDir);
-                        cout << "\n";
-                        processFormatString(format, newEntry);
-                        //cout << "\nnewEntry path: " << newEntry.path_ << "\n";
-                        if (stat(nextFn.str().c_str(), &info) != 0) 
-                            cerr << Path::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
-                        else if (S_ISDIR(info.st_mode))
-                            traverse(Path(nextFn.str(), magicDir), magicDir, format);
-                    }
+    if(path.type_ == "inode/directory") {
+        //cout << "is a directory\n";
+        if((dir = opendir(path.path_.c_str())) == NULL)
+            cerr << Path::PROGNAME << ": " << path.path_ << " opendir() error\n";
+        else {
+            while((entry = readdir(dir)) != NULL) {
+                nextFn.str("");
+                nextFn.clear();
+                //cout << "inside while\n";
+                if((entry -> d_name[0]) != '.') {
+                    //cout << "inside d_name\n";
+                    nextFn << path.path_ << "/" << entry->d_name;
                     
+                    Path newEntry = path.addEntry(nextFn.str(), magicDir);
+                    cout << "\n";
+                    processFormatString(format, newEntry);
+                    //cout << "\nnewEntry path: " << newEntry.path_ << "\n";
+                    if (stat(nextFn.str().c_str(), &info) != 0) 
+                        cerr << Path::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
+                    else if (S_ISDIR(info.st_mode))
+                        traverse(Path(nextFn.str(), magicDir), magicDir, format);
                 }
+                
             }
         }
-        return path;
+    }
+    return path;
 }
 
 
@@ -147,13 +147,13 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    cout << "aFind: " << aFind << "\n";
+    cout << "aFind: " << aFind << " optind: " << optind << "\n";
     //cout << "\nformat: " << format << " magicFile: " << magicFile << "\n";
     // ------------------ End Parse Command Line Arguments ----------------
     
     // Create an array containing each directory/file
 	vector<Path> paths;
-	for(int i = 2; i < argc; i++) {
+	for(int i = optind; i < argc; i++) {
         string str(argv[i]);
 		Path path(argv[i], dir);
 		paths.push_back(path);
