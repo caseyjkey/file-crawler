@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>      // For ostringstream
+#include <cstring>
 using namespace std;
 
  //corn fritters, georgia
@@ -64,10 +65,12 @@ Bunch traverse(Bunch path, string magicDir, string format, int aFind) {
             cerr << Bunch::PROGNAME << ": " << path.path_ << " opendir() error\n";
         else {
             while((entry = readdir(dir)) != NULL) {
+                cout << "\ntest : " << entry -> d_name << '\n';
                 nextFn.str("");
                 nextFn.clear();
                 if( aFind == 1) {
-                    if (*entry -> d_name != '.') { 
+                    cout << "entry_dname: " << entry -> d_name << "\n";
+                    if (*entry->d_name != '.') { 
                     cout << "\n" << entry -> d_name;
                     nextFn << path.path_ << "/" << entry->d_name;
                     Bunch newEntry = path.addEntry(nextFn.str(), magicDir);
