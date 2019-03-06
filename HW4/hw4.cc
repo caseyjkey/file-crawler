@@ -51,6 +51,7 @@ void processFormatString(string tokens, Bunch currentPath) {
             }
         }
     }
+    cout << "\n";
 }
 
 
@@ -58,43 +59,38 @@ Bunch traverse(Bunch path, string magicDir, string format, int aFind) {
     DIR *dir;
     struct dirent *entry;
     struct stat info;
-    
+    Bunch newEntry = path;
     ostringstream nextFn;
     if(path.type_ == "inode/directory") {
         if((dir = opendir(path.path_.c_str())) == NULL)
             cerr << Bunch::PROGNAME << ": " << path.path_ << " opendir() error\n";
         else {
             while((entry = readdir(dir)) != NULL) {
-                cout << "\ntest : " << entry -> d_name << '\n';
                 nextFn.str("");
                 nextFn.clear();
-                if( aFind == 1) {
-                    cout << "entry_dname: " << entry -> d_name << "\n";
-                    if (*entry->d_name != '.') { 
-                    cout << "\n" << entry -> d_name;
+                if ( (entry -> d_name[0]) != '.' && aFind == 0)  {
                     nextFn << path.path_ << "/" << entry->d_name;
-                    Bunch newEntry = path.addEntry(nextFn.str(), magicDir);
-                    cout << "\n";
+                        
+                    newEntry = path.addEntry(nextFn.str(), magicDir);
                     processFormatString(format, newEntry);
                     if (stat(nextFn.str().c_str(), &info) != 0) 
                         cerr << Bunch::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
                     else if (S_ISDIR(info.st_mode))
-                        traverse(Bunch(nextFn.str(), magicDir), magicDir, format, aFind);
-                    }
+                        traverse(newEntry, magicDir, format, aFind);
                 }
-                else {
-                    if ((entry -> d_name[0]) != '.') {
- 
+                //cout << S_ISDIR(info.st_mode) << endl;
+                //system("ls ./..");
+                if (entry -> d_name[1] != '.' && aFind == 1 && !(entry->d_name[0] == '.' && entry->d_name[1] == '\0')) {
+                    nextFn.str("");
+                    nextFn.clear();
                     nextFn << path.path_ << "/" << entry->d_name;
-                    
-                    Bunch newEntry = path.addEntry(nextFn.str(), magicDir);
-                    cout << "\n";
+                    newEntry = path.addEntry(nextFn.str(), magicDir);
+                    //if(newEntry.isNull_) break;
                     processFormatString(format, newEntry);
                     if (stat(nextFn.str().c_str(), &info) != 0) 
                         cerr << Bunch::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
                     else if (S_ISDIR(info.st_mode))
-                        traverse(Bunch(nextFn.str(), magicDir), magicDir, format, aFind);
-                    }
+                        traverse(newEntry, magicDir, format, aFind);
                 }
             }
             closedir(dir);

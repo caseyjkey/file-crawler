@@ -39,7 +39,7 @@ Bunch::Bunch(string path, string magic) {
             permissions(statbuf, permissions_);
 }
 
-string Bunch::PROGNAME = "hw3";
+string Bunch::PROGNAME = "hw4";
 
 Bunch &Bunch::addEntry(string path, string magic) {
     Bunch retVal(path, magic);
