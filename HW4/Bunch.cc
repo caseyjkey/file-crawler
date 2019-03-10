@@ -12,7 +12,7 @@
 using namespace std;
 
 // Constructor
-Bunch::Bunch(string path, string magic, string format, bool all) {
+Bunch::Bunch(string path, string magic, string format, bool all = false) {
             // Open a statbuf
             struct stat statbuf;
             int openFile = lstat(path.c_str(), &statbuf);

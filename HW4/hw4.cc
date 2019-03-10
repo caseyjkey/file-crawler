@@ -11,11 +11,9 @@ using namespace std;
 
 void processFormatString(Bunch currentPath) {
     string tokens = currentPath.format_;
-    for(string::size_type i = 0; i < tokens.size(); ++i) {
-        if( tokens[i] != '%') {
-                    cout << tokens[i];
-                }
-        else {
+    for(unsigned int i = 0; i < tokens.size(); ++i) {
+        
+        if( tokens [i] == '%') {
             ++i;
             if(tokens[i] == 'n') {
                 cout << currentPath.path_;
@@ -50,6 +48,17 @@ void processFormatString(Bunch currentPath) {
             else if(tokens[i] == 'M') {
                 cout << currentPath.type_;
             }
+        }
+        else if( tokens[i] == '\\') {
+            //int j = i + 1;
+            //ostringstream escape;
+            //escape << tokens[i] << tokens[j];
+            //char escapeChar = char(escape.str());
+            i++;
+            cout << "\t"; //escape.str();
+        }
+        else if( tokens[i] != '%') {
+            cout << tokens[i];
         }
     }
     cout << "\n";
