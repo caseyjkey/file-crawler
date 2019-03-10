@@ -35,15 +35,16 @@ Bunch::Bunch(string path, string magic, string format, bool all) {
             group_NAME_  = group_NAME(group_UID_);
             magic_num_   = readMagicNumber(path_);
             type_        = findMediaType(magic_num_, mediaTypes, statbuf);
-             //sizePath(statbuf);
-
+            format_      = format;
+            all_         = all;
             permissions(statbuf, permissions_);
+            
 }
 
 string Bunch::PROGNAME = "hw4";
 
-Bunch &Bunch::addEntry(string path, string magic) {
-    Bunch retVal(path, magic);
+Bunch &Bunch::addEntry(string path, string magic, string format, bool all) {
+    Bunch retVal(path, magic, format, all);
     //cout << "adding " << retVal.path_ << "\n";
     entries.push_back(retVal);
     //cout << "\nentries size: " << entries.size() << "\n";

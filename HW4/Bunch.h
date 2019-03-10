@@ -11,7 +11,7 @@ using namespace std;
 
 class Bunch {
     public:
-        Bunch(string, string);
+        Bunch(string, string, string, bool);
         static string PROGNAME;
         vector< pair<string, string> > mediaTypes;
         vector<pair<string, string>> readMediaTypeFile(string);
@@ -27,20 +27,22 @@ class Bunch {
         string inttohex(int);
         string readMagicNumber(string);
         string findMediaType(string, vector< pair<string, string> >, struct stat &);
-        Bunch &addEntry(string, string);
+        Bunch &addEntry(string, string, string, bool);
         
         // ------------------ Bunch Attributes ----------------
         string path_;
         string type_;
-        int user_UID_;
         string permissions_;
+        int    user_UID_;
+        int    group_UID_;
         string group_NAME_;
-        int group_UID_;
         string user_NAME_;
         string access_time_;
         string mod_time_;
         string status_time_;
         string magic_num_;
+        string format_;
+        bool   all_;
         vector<Bunch> entries;
         
         // ------------------ Helper Attributes ---------------

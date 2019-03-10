@@ -9,7 +9,8 @@ using namespace std;
 
  //corn fritters, georgia
 
-void processFormatString(string tokens, Bunch currentPath) {
+void processFormatString(Bunch currentPath) {
+    string tokens = currentPath.format_;
     for(string::size_type i = 0; i < tokens.size(); ++i) {
         if( tokens[i] != '%') {
                     cout << tokens[i];
@@ -55,7 +56,7 @@ void processFormatString(string tokens, Bunch currentPath) {
 }
 
 
-Bunch traverse(Bunch path, string magicDir, string format, int aFind) {
+Bunch traverse(Bunch path, string magicDir, string format, bool all) {
     DIR *dir;
     struct dirent *entry;
     struct stat info;
@@ -68,29 +69,28 @@ Bunch traverse(Bunch path, string magicDir, string format, int aFind) {
             while((entry = readdir(dir)) != NULL) {
                 nextFn.str("");
                 nextFn.clear();
-                if ( (entry -> d_name[0]) != '.' && aFind == 0)  {
+                // Is the directory hidden and we dont want all?
+                if ( (entry -> d_name[0]) != '.' && !all)  {
                     nextFn << path.path_ << "/" << entry->d_name;
                         
-                    newEntry = path.addEntry(nextFn.str(), magicDir);
-                    processFormatString(format, newEntry);
+                    newEntry = path.addEntry(nextFn.str(), magicDir, format, all);
+                    processFormatString(newEntry);
                     if (stat(nextFn.str().c_str(), &info) != 0) 
                         cerr << Bunch::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
                     else if (S_ISDIR(info.st_mode))
-                        traverse(newEntry, magicDir, format, aFind);
+                        traverse(newEntry, magicDir, format, all);
                 }
-                //cout << S_ISDIR(info.st_mode) << endl;
-                //system("ls ./..");
-                if (entry -> d_name[1] != '.' && aFind == 1 && !(entry->d_name[0] == '.' && entry->d_name[1] == '\0')) {
+                // We want all. Is it hidden or just a default dot directory?
+                if (entry -> d_name[1] != '.' && all && !(entry->d_name[0] == '.' && entry->d_name[1] == '\0')) {
                     nextFn.str("");
                     nextFn.clear();
                     nextFn << path.path_ << "/" << entry->d_name;
-                    newEntry = path.addEntry(nextFn.str(), magicDir);
-                    //if(newEntry.isNull_) break;
-                    processFormatString(format, newEntry);
+                    newEntry = path.addEntry(nextFn.str(), magicDir, format, all);
+                    processFormatString(newEntry);
                     if (stat(nextFn.str().c_str(), &info) != 0) 
                         cerr << Bunch::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
                     else if (S_ISDIR(info.st_mode))
-                        traverse(newEntry, magicDir, format, aFind);
+                        traverse(newEntry, magicDir, format, all);
                 }
             }
             closedir(dir);
@@ -116,12 +116,12 @@ int main(int argc, char* argv[]) {
     
 	// ---------------- Parse command line options -------------------------
 	int opt;
-	int aFind, mFind, fFind;
+	bool aFind, mFind, fFind;
 	string magicFile, format;
 
-    aFind = 0;
-    mFind = 0;
-    fFind = 0;
+    aFind = false;
+    mFind = false;
+    fFind = false;
 	while((opt = getopt(argc, argv, "am:f:")) != -1) {
         switch (opt) {
             case 'm':
@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
                     return 1;
                 }
                 else {
-                    mFind = 1;
+                    mFind = true;
                     magic = optarg;
                     // Did the user pass a valid magic file?
                     struct stat buf;
@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             case 'a':
-                aFind = 1;
+                aFind = true;
                 break;
             case 'f':
                 if(fFind == 1) {
@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
                     return 1;
                 }
                 else {
-                    fFind = 1;
+                    fFind = true;
                     format = optarg;
                 }
                 break;
@@ -158,7 +158,7 @@ int main(int argc, char* argv[]) {
                 return 1;
         }
     }
-    if(fFind == 0) format = "%p %U %G %s %n";
+    if(!fFind) format = "%p %U %G %s %n";
     // --------------------------------------------------------------------
     
     // ------------------ End Parse Command Line Arguments ----------------
@@ -166,8 +166,8 @@ int main(int argc, char* argv[]) {
     // Create a vector containing each path passed as an argument
 	vector<Bunch> paths;
 	for(int i = optind; i < argc; i++) {
-        string str(argv[i]);
-		Bunch path(str, magic);
+        string aPath(argv[i]);
+		Bunch path(aPath, magic, format, aFind);
 		paths.push_back(path);
 	}
     
@@ -175,9 +175,9 @@ int main(int argc, char* argv[]) {
    
     // ----------------- Traverse and Output Bunchs ------------------------
 	for(auto path : paths) {
-        Bunch currentPath(path);
-        if(currentPath.isNull_) continue;
-        processFormatString(format, path);
+        //Bunch currentPath(path, magic, format, aFind);
+        if(path.isNull_) continue;
+        processFormatString(path);
         path = traverse(path, magic, format, aFind);
         cout << endl;
     }
