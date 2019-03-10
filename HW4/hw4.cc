@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
 
 	// ------------------- Default magic-file ------------------------------ 
 	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
-    string dir = csDir + "/pub/media-types";
+    string magic = csDir + "/pub/media-types";
     // ---------------------------------------------------------------------
     
 	// ---------------- Parse command line options -------------------------
@@ -131,11 +131,11 @@ int main(int argc, char* argv[]) {
                 }
                 else {
                     mFind = 1;
-                    dir = optarg;
-                    // Check if valid
+                    magic = optarg;
+                    // Did the user pass a valid magic file?
                     struct stat buf;
-                    if(stat(dir.c_str(), &buf) != 0) {
-                        cerr << PROGNAME << ": error '" << dir << "' can't be opened\n";
+                    if(stat(magic.c_str(), &buf) != 0) {
+                        cerr << PROGNAME << ": error '" << magic << "' can't be opened\n";
                         return 1;
                     }
                 }
@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
 	vector<Bunch> paths;
 	for(int i = optind; i < argc; i++) {
         string str(argv[i]);
-		Bunch path(str, dir);
+		Bunch path(str, magic);
 		paths.push_back(path);
 	}
     
@@ -178,7 +178,7 @@ int main(int argc, char* argv[]) {
         Bunch currentPath(path);
         if(currentPath.isNull_) continue;
         processFormatString(format, path);
-        path = traverse(path, dir, format, aFind);
+        path = traverse(path, magic, format, aFind);
         cout << endl;
     }
     return 0;

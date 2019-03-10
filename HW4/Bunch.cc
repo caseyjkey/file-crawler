@@ -1,5 +1,4 @@
 #include "Bunch.h"
-
 #include <iostream>           // For cerr
 #include <sys/types.h>
 #include <fstream>            // For ifstream
@@ -7,11 +6,13 @@
 #include <vector>
 #include <sys/stat.h>
 #include <pwd.h>
+#include <bits/stdc++.h>
+#include <string>
 #include <grp.h>
 using namespace std;
 
 // Constructor
-Bunch::Bunch(string path, string magic) {
+Bunch::Bunch(string path, string magic, string format, bool all) {
             // Open a statbuf
             struct stat statbuf;
             int openFile = lstat(path.c_str(), &statbuf);
@@ -135,6 +136,7 @@ string Bunch::time(struct stat &statbuf, bool access = 0, bool mod = 1, bool sta
     return timeOutput;
 }
 
+
 string Bunch::inttohex(int num) {
     // https://bit.ly/2InTEd9
     
@@ -142,6 +144,16 @@ string Bunch::inttohex(int num) {
     //cout << "Base 16 num: " << num << " ";
     string d = "0123456789abcdef"; //
     string res;
+    if (num < 0) { 
+        stringstream ss;
+        ss << hex << num;
+        string res = ss.str();
+        int x = 0;
+        for(unsigned int i = 0; i < res.length(); i++)
+            if(res[i] == 'f') x++;
+        string res1 = res.substr(x, res.length());
+        return res1;
+    }
     while(num > 0) {
         res = d[num % 16] + res;
         num /= 16;
@@ -157,16 +169,10 @@ string Bunch::readMagicNumber(string dir) {
     string magicNum;
     for ( int i = 0; i < 32; i++ ) {
         file.get(chrctr);
-        //if(dir == "/s/bach/a/class/cs253/pub/tree/alpha/iota/kappa")
-            //cout << "get: " << char(chrctr) << "\n";
-        //cout << "character: " << chrctr << "\n";
-        
         if(chrctr < '!' || chrctr > '~') {
-            //cout << "Inside readMagicNumber if, get read: " << char(chrctr) << "\n";
             magicNum += "%" +  inttohex(chrctr);
         } else {
             magicNum += chrctr;
-            //cout << "Inside readMagicNumber else, get read: " << chrctr << "\n";
         }
     }
     //cout << "magicNum: " << magicNum << "\n";
