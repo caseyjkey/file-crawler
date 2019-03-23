@@ -11,11 +11,22 @@ using namespace std;
 
 class Bunch {
     public:
+		Bunch();
 		Bunch(const string); 
 		Bunch(const string, const string);
+		Bunch(const string, const string, const string);
         Bunch(const string, const string,  const string, bool);
 		
-        static string PROGNAME;
+        void path(string); // replaces the path attribute of a Bunch, throw a string upon error including bad path
+		void magic(string); // Same rules as above regarding errors
+		void format(string);  // default arg is %p %U %G %s %n
+		void all(string); // default arg is true
+		const size_t size(); // number of entries 
+		const bool empty();
+		const string entry(size_t);
+		
+		
+		static string PROGNAME;
         vector< pair<string, string> > mediaTypes;
         vector<pair<string, string>> readMediaTypeFile(string);
         int user_UID(string);
@@ -50,7 +61,7 @@ class Bunch {
         
         // ------------------ Helper Attributes ---------------
         bool isNull_;
-        off_t size_;
+        off_t fileSize_;
         int numberOfEntries;
         
 };

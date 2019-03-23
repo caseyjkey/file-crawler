@@ -36,7 +36,7 @@ Bunch::Bunch(const string path, const string magic, const string format, bool al
             }
             
             // Begin assigning values to attributes
-            size_        = statbuf.st_size;
+            fileSize_        = statbuf.st_size;
             mediaTypes   = readMediaTypeFile(magic);
             path_        = path;
             access_time_ = time(statbuf, 1, 0, 0);
@@ -61,10 +61,8 @@ string Bunch::PROGNAME = "hw4";
 
 
 Bunch &Bunch::addEntry(string path, string magic, string format, bool all) {
-    Bunch retVal(path, magic, format, all);
-    //cout << "adding " << retVal.path_ << "\n";
-    entries.push_back(retVal);
-    //cout << "\nentries size: " << entries.size() << "\n";
+    Bunch newBunch(path, magic, format, all);
+    entries.push_back(newBunch);
     return this->entries.back();
 }
 
