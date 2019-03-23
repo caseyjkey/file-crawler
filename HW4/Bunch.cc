@@ -11,8 +11,17 @@
 #include <grp.h>
 using namespace std;
 
-// Constructor
-Bunch::Bunch(string path, string magic, string format, bool all = false) {
+// Constructors
+Bunch::Bunch() : Bunch::Bunch("") { }
+
+// ------------------- Default magic-file ------------------------------ 
+	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
+    const string magic = csDir + "/pub/media-types";
+// ---------------------------------------------------------------------
+
+Bunch::Bunch(const string path) : Bunch::Bunch(path, magic)
+
+Bunch::Bunch(const string path, const string magic, const string format, bool all = false) {
             // Open a statbuf
             struct stat statbuf;
             int openFile = lstat(path.c_str(), &statbuf);
@@ -41,7 +50,11 @@ Bunch::Bunch(string path, string magic, string format, bool all = false) {
             
 }
 
+
+
 string Bunch::PROGNAME = "hw4";
+
+
 
 Bunch &Bunch::addEntry(string path, string magic, string format, bool all) {
     Bunch retVal(path, magic, format, all);

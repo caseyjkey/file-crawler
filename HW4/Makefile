@@ -1,10 +1,6 @@
 CXXFLAGS =-std=c++11 -O -Wall -Wextra -Wpedantic
 
-hw4: hw4.o Bunch.o Bunch.h
-	$(CXX) $(CXXFLAGS) hw4.o Bunch.o -o $@
-
-path.o:: Bunch.h
-hw3.o:: hw4.cc Bunch.h
-
+hw4(Bunch.o): Bunch.o
+	ar cr hw4.a Bunch.o
 clean:
 	rm -f main *.o

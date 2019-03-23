@@ -11,7 +11,10 @@ using namespace std;
 
 class Bunch {
     public:
-        Bunch(string, string, string, bool);
+		Bunch(const string); 
+		Bunch(const string, const string);
+        Bunch(const string, const string,  const string, bool);
+		
         static string PROGNAME;
         vector< pair<string, string> > mediaTypes;
         vector<pair<string, string>> readMediaTypeFile(string);
