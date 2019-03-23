@@ -7,63 +7,66 @@
 #include <vector>
 #include <pwd.h>
 #include <grp.h>
-using namespace std;
 
 class Bunch {
+	
+	
     public:
 		Bunch();
-		Bunch(const string); 
-		Bunch(const string, const string);
-		Bunch(const string, const string, const string);
-        Bunch(const string, const string,  const string, bool);
+		Bunch(const std::string); 
+		Bunch(const std::string, const std::string);
+		Bunch(const std::string, const std::string, const std::string);
+        Bunch(const std::string, const std::string,  const std::string, bool);
 		
-        void path(string); // replaces the path attribute of a Bunch, throw a string upon error including bad path
-		void magic(string); // Same rules as above regarding errors
-		void format(string);  // default arg is %p %U %G %s %n
-		void all(string); // default arg is true
-		const size_t size(); // number of entries 
-		const bool empty();
-		const string entry(size_t);
+        void              path(std::string); // replaces the path attribute of a Bunch, throw a std::string upon error including bad path
+		void              magic(std::string); // Same rules as above regarding errors
+		void              format(std::string);  // default arg is %p %U %G %s %n
+		void              all(std::string); // default arg is true
+		const size_t      size(); // number of entries 
+		const bool        empty();
+		const std::string entry(size_t);
 		
 		
-		static string PROGNAME;
-        vector< pair<string, string> > mediaTypes;
-        vector<pair<string, string>> readMediaTypeFile(string);
-        int user_UID(string);
-        int user_UID(struct stat &);
-        string user_NAME(int);
-        int group_UID(struct stat &);
-        string group_NAME(int);
-        int permissions(struct stat &, string &);
-        int sizePath(struct stat &);
-        void isNull(bool);
-        string time(struct stat &, bool, bool, bool);
-        string inttohex(int);
-        string readMagicNumber(string);
-        string findMediaType(string, vector< pair<string, string> >, struct stat &);
-        Bunch &addEntry(string, string, string, bool);
+        std:vector< pair<std::string, std::string> > mediaTypes;
+        std:vector<pair<std::string, std::string>> readMediaTypeFile(std::string);
+        int         user_UID(std::string);
+        int         user_UID(struct stat &);
+        std::string user_NAME(int);
+        int         group_UID(struct stat &);
+        std::string group_NAME(int);
+        int         permissions(struct stat &, std::string &);
+        int         sizePath(struct stat &);
+        void        isNull(bool);
+        std::string time(struct stat &, bool, bool, bool);
+        std::string inttohex(int);
+        std::string readMagicNumber(std::string);
+        std::string findMediaType(std::string, std:vector< pair<std::string, std::string> >, struct stat &);
+		Bunch       traverse(Bunch, std::string, std::string, bool);
+        Bunch       &addEntry(std::string, std::string, std::string, bool);
         
         // ------------------ Bunch Attributes ----------------
-        string path_;
-        string type_;
-        string permissions_;
-        int    user_UID_;
-        int    group_UID_;
-        string group_NAME_;
-        string user_NAME_;
-        string access_time_;
-        string mod_time_;
-        string status_time_;
-        string magic_num_;
-        string format_;
-        bool   all_;
-        vector<Bunch> entries;
+        std::string       path_;
+        std::string       type_;
+        std::string       permissions_;
+        int               user_UID_;
+        int               group_UID_;
+        std::string       group_NAME_;
+        std::string       user_NAME_;
+        std::string       access_time_;
+        std::string       mod_time_;
+        std::string       status_time_;
+        std::string       magic_num_;
+        std::string       format_;
+        bool              all_;
+        std:vector<Bunch> entries;
         
         // ------------------ Helper Attributes ---------------
         bool isNull_;
         off_t fileSize_;
         int numberOfEntries;
         
+	private:
+		static std::string PROGNAME;
 };
 
 #endif

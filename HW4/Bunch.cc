@@ -11,12 +11,14 @@
 #include <grp.h>
 using namespace std;
 
+string Bunch::PROGNAME = "hw4";
+
 // ------------------- Default magic-file ------------------------------ 
 const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
 const string magic = csDir + "/pub/media-types";
 // ---------------------------------------------------------------------
 
-// Constructors
+// ---------------------- Constructors ---------------------------------
 Bunch::Bunch() : Bunch::Bunch("") { }
 
 Bunch::Bunch(const string path) : Bunch::Bunch(path, magic) { }
@@ -36,7 +38,7 @@ Bunch::Bunch(const string path, const string magic, const string format, bool al
             }
             
             // Begin assigning values to attributes
-            fileSize_        = statbuf.st_size;
+            fileSize_    = statbuf.st_size;
             mediaTypes   = readMediaTypeFile(magic);
             path_        = path;
             access_time_ = time(statbuf, 1, 0, 0);
@@ -53,18 +55,88 @@ Bunch::Bunch(const string path, const string magic, const string format, bool al
             permissions(statbuf, permissions_);
             
 }
+// ---------------------------------------------------------------------
 
+void path(string) { // replaces the path attribute of a Bunch, throw a string upon error including bad path
+	struct stat statbuf;
+	int openFile = lstat(path.c_str(), &statbuf);
+	if(openFile != 0) {
+		cerr << PROGNAME << ": cannot access '" << path << "': No such file or directory\n";
+		isNull(true);
+		return;
+	}
+}
+void magic(string) { // Same rules as above regarding errors
 
+}	
+void Bunch::format(string format = "%p %U %G %s %n") {  // default arg is %p %U %G %s %n
+	this->format_ = format;
+}
+void Bunch::all(string) { // default arg is true
 
-string Bunch::PROGNAME = "hw4";
+}
+const size_t Bunch::size() { // number of entries
 
+} 
+const bool Bunch::empty() { //is entries == 0?
 
+}
+const Bunch::string entry(size_t index) {
+
+}
+
+// -------------------- Build Entries ----------------------------------
+Bunch Bunch::traverse(string magicDir, string format, bool all) {
+    DIR *dir;
+    struct dirent *entry;
+    struct stat info;
+    Bunch newEntry = this;
+    ostringstream nextFn;
+    if(this->type_ == "inode/directory") {
+        if((dir = opendir(this->path_.c_str())) == NULL)
+            cerr << Bunch::PROGNAME << ": " << this->path_ << " opendir() error\n";
+        else {
+            while((entry = readdir(dir)) != NULL) {
+                nextFn.str("");
+                nextFn.clear();
+                // Is the directory hidden and we dont want all?
+                if ( (entry -> d_name[0]) != '.' && !all)  {
+                    nextFn << this->path_ << "/" << entry->d_name;
+                        
+                    newEntry = this->addEntry(nextFn.str(), magicDir, format, all);
+                    processFormatString(newEntry);
+                    if (stat(nextFn.str().c_str(), &info) != 0) 
+                        cerr << Bunch::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
+                    else if (S_ISDIR(info.st_mode))
+                        traverse(newEntry, magicDir, format, all);
+                }
+                // We want all. Is it hidden or just a default dot directory?
+                if (entry -> d_name[1] != '.' && all && !(entry->d_name[0] == '.' && entry->d_name[1] == '\0')) {
+                    nextFn.str("");
+                    nextFn.clear();
+                    nextFn << this -> path_ << "/" << entry->d_name;
+                    newEntry = this -> addEntry(nextFn.str(), magicDir, format, all);
+                    processFormatString(newEntry);
+                    if (stat(nextFn.str().c_str(), &info) != 0) 
+                        cerr << Bunch::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
+                    else if (S_ISDIR(info.st_mode))
+                        traverse(newEntry, magicDir, format, all);
+                }
+            }
+            closedir(dir);
+        }
+    }
+    return this;
+}
 
 Bunch &Bunch::addEntry(string path, string magic, string format, bool all) {
     Bunch newBunch(path, magic, format, all);
     entries.push_back(newBunch);
     return this->entries.back();
 }
+
+// ---------------------------------------------------------------------
+
 
 vector< pair<string, string> > Bunch::readMediaTypeFile(string dir) {
     ifstream inFile;
