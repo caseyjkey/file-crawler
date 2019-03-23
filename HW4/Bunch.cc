@@ -11,15 +11,19 @@
 #include <grp.h>
 using namespace std;
 
+// ------------------- Default magic-file ------------------------------ 
+const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
+const string magic = csDir + "/pub/media-types";
+// ---------------------------------------------------------------------
+
 // Constructors
 Bunch::Bunch() : Bunch::Bunch("") { }
 
-// ------------------- Default magic-file ------------------------------ 
-	const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
-    const string magic = csDir + "/pub/media-types";
-// ---------------------------------------------------------------------
+Bunch::Bunch(const string path) : Bunch::Bunch(path, magic) { }
 
-Bunch::Bunch(const string path) : Bunch::Bunch(path, magic)
+Bunch::Bunch(const string path, const string magic) : Bunch::Bunch(path, magic, "%p %U %G %s %n") { }
+
+Bunch::Bunch(const string path, const string magic, const string format) : Bunch::Bunch(path, magic, format, false) { } 
 
 Bunch::Bunch(const string path, const string magic, const string format, bool all = false) {
             // Open a statbuf
