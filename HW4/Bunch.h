@@ -21,7 +21,7 @@ class Bunch {
         void        path(std::string); // replaces the path attribute of a Bunch, throw a std::string upon error including bad path
 		void        magic(std::string); // Same rules as above regarding errors
 		void        format(std::string);  // default arg is %p %U %G %s %n
-		void        all(std::string); // default arg is true
+		void        all(bool); // default arg is true
 		size_t      size() const; // number of entries 
 		bool        empty() const;
 		std::string entry(size_t) const;

@@ -31,18 +31,35 @@ Bunch::Bunch(const string path, const string magicFile, const string format) : B
 Bunch::Bunch(const string path, const string magicFile, const string format, bool all = false) {
             // Open a statbuf
             struct stat statbuf;
-            int openFile = lstat(path.c_str(), &statbuf);
+            // Check if the magicFile is okay
+            int openFile = lstat(magicFile.c_str(), &statbuf);
             if(openFile != 0) {
-                cerr << PROGNAME << ": cannot access '" << path << "': No such file or directory\n";
+                cerr << PROGNAME << ": cannot access the magic file '" << path << "': No such file or directory\n";
+                isNull(true);
+                return;
+            }
+            // Check if the path is okay
+            openFile = lstat(path.c_str(), &statbuf);
+            if(openFile != 0) {
+                cerr << PROGNAME << ": cannot access the path '" << path << "': No such file or directory\n";
                 isNull(true);
                 return;
             }
             
+            
             // Begin assigning values to attributes
+            path_        = path;
             fileSize_    = statbuf.st_size;
+            
+            magic_num_   = readMagicNumber(path_);
             magicFile_   = magicFile;
             mediaTypes   = readMediaTypeFile(magicFile);
-            path_        = path;
+            type_        = findMediaType(magic_num_, mediaTypes, statbuf);
+            
+            format_      = format;
+            all_         = all;
+            traverse(*this, magicFile, format, all);
+            
             access_time_ = time(statbuf, 1, 0, 0);
             mod_time_    = time(statbuf, 0, 1, 0);
             status_time_ = time(statbuf, 0, 0 ,1);
@@ -50,12 +67,7 @@ Bunch::Bunch(const string path, const string magicFile, const string format, boo
             group_UID_   = group_UID(statbuf);
             user_NAME_   = user_NAME(user_UID_);
             group_NAME_  = group_NAME(group_UID_);
-            magic_num_   = readMagicNumber(path_);
-            type_        = findMediaType(magic_num_, mediaTypes, statbuf);
-            format_      = format;
-            all_         = all;
             permissions(statbuf, permissions_);
-            traverse(*this, magicFile, format, all);
             
 }
 // ---------------------------------------------------------------------
@@ -65,30 +77,102 @@ void Bunch::path(string path) { // replaces the path attribute of a Bunch, throw
 	struct stat statbuf;
 	int openFile = lstat(path.c_str(), &statbuf);
 	if(openFile != 0) {
-		cerr << PROGNAME << ": cannot access '" << path << "': No such file or directory\n";
+		cerr << PROGNAME << ": cannot access the path '" << path << "': No such file or directory\n";
 		isNull(true);
 		return;
 	}
+	
 	this->path_ = path;
     traverse(*this, this->magicFile_, this->format_, this->all_);
+    
+    return;
 }
-void Bunch::magic(string) { // Same rules as above regarding errors
-
+void Bunch::magic(string magicFile) { // Same rules as above regarding errors
+    struct stat statbuf;
+	int openFile = lstat(magicFile.c_str(), &statbuf);
+	if(openFile != 0) {
+		cerr << PROGNAME << ": cannot access the magic file '" << this->path_ << "': No such file or directory\n";
+		isNull(true);
+		return;
+	}
+	
+	lstat(this->path_.c_str(), &statbuf);
+	this->magicFile_   = magicFile;
+    this->mediaTypes   = readMediaTypeFile(magicFile);
+    this->type_        = findMediaType(magic_num_, mediaTypes, statbuf);
+    
+    return;
+    
 }	
 void Bunch::format(string format = "%p %U %G %s %n") {  // default arg is %p %U %G %s %n
 	this->format_ = format;
 }
-void Bunch::all(string) { // default arg is true
-
+void Bunch::all(bool all = true) { // default arg is true
+    this->all_ = all;
+    traverse(*this, this->magicFile_, this->format_, this->all_);
+    
+    return;
 }
 size_t Bunch::size() const { // number of entries
-
+    return this->entries.size();
 } 
 bool Bunch::empty() const { //is entries == 0?
-
+    return (this->size() == 0) ? true : false;
 }
 string Bunch::entry(size_t index) const {
-
+    const Bunch &currentPath = this->entries[index];
+    string tokens = currentPath.format_;
+    for(unsigned int i = 0; i < tokens.size(); ++i) {
+        
+        if( tokens [i] == '%') {
+            ++i;
+            if(tokens[i] == 'n') {
+                cout << currentPath.path_;
+            }
+            else if(tokens[i] == 'p') {
+                cout << currentPath.permissions_;
+            }
+            else if(tokens[i] == 'u') {
+                cout << currentPath.user_UID_;
+            }
+            else if(tokens[i] == 'U') {
+                cout << currentPath.user_NAME_;
+            }
+            else if(tokens[i] == 'g') {
+                cout << currentPath.group_UID_;
+            }
+            else if(tokens[i] == 'G') {
+                cout << currentPath.group_NAME_;
+            }
+            else if(tokens[i] == 's') {
+                cout << currentPath.fileSize_;
+            }
+            else if(tokens[i] == 'a') {
+                cout << currentPath.access_time_;
+            }
+            else if(tokens[i] == 'm') {
+                cout << currentPath.mod_time_;
+            }
+            else if(tokens[i] == 'c') {
+                cout << currentPath.status_time_;
+            }
+            else if(tokens[i] == 'M') {
+                cout << currentPath.type_;
+            }
+        }
+        /*
+        else if( tokens[i] == '\\') {
+            //int j = i + 1;
+            //ostringstream escape;
+            //escape << tokens[i] << tokens[j];
+            //char escapeChar = char(escape.str());
+            i++;
+            cout << "\t"; //escape.str();
+        }*/
+        else if( tokens[i] != '%') {
+            cout << tokens[i];
+        }
+    }
 }
 
 // -------------------- Build Entries ----------------------------------
@@ -138,6 +222,22 @@ Bunch &Bunch::addEntry(string path, string magicFile, string format, bool all) {
 
 // ---------------------------------------------------------------------
 
+// ------------------------- Media Types -------------------------------
+string Bunch::readMagicNumber(string dir) {
+    ifstream file(dir);
+    char chrctr;
+    string magicNum;
+    for ( int i = 0; i < 32; i++ ) {
+        file.get(chrctr);
+        if(chrctr < '!' || chrctr > '~') {
+            magicNum += "%" +  inttohex(chrctr);
+        } else {
+            magicNum += chrctr;
+        }
+    }
+    //cout << "magicNum: " << magicNum << "\n";
+    return magicNum;
+}
 
 vector< pair<string, string> > Bunch::readMediaTypeFile(string dir) {
     ifstream inFile;
@@ -152,6 +252,26 @@ vector< pair<string, string> > Bunch::readMediaTypeFile(string dir) {
     }
     return mediaTypes;
 }
+
+string Bunch::findMediaType(string magicNum, vector< pair<string, string> > MediaTypes, struct stat &statbuf) {
+    if(S_ISDIR(statbuf.st_mode)) return "inode/directory";
+    if(S_ISLNK(statbuf.st_mode)) return "inode/symlink";
+    if(sizePath(statbuf) == 0) return "inode/empty";
+    bool match;
+    for(auto& elem : MediaTypes) {
+        match = 1;
+        for(unsigned int i = 0; i < elem.first.length(); i++) {
+                    //cout << magicNum[i] << " compared to " << elem.first[i] << "\n";
+            if(magicNum[i] != elem.first[i]) {
+                    match = 0;
+            }
+        }
+        if(match) return elem.second;
+    }
+    return "application/octet-data";
+}
+
+// ----------------------------------------------------------------------
 
 void Bunch::isNull(bool setTo) {
     isNull_ = setTo;
@@ -252,39 +372,7 @@ string Bunch::inttohex(int num) {
     return res;
 }
 
-string Bunch::readMagicNumber(string dir) {
-    ifstream file(dir);
-    char chrctr;
-    string magicNum;
-    for ( int i = 0; i < 32; i++ ) {
-        file.get(chrctr);
-        if(chrctr < '!' || chrctr > '~') {
-            magicNum += "%" +  inttohex(chrctr);
-        } else {
-            magicNum += chrctr;
-        }
-    }
-    //cout << "magicNum: " << magicNum << "\n";
-    return magicNum;
-}
 
-string Bunch::findMediaType(string magicNum, vector< pair<string, string> > MediaTypes, struct stat &statbuf) {
-    if(S_ISDIR(statbuf.st_mode)) return "inode/directory";
-    if(S_ISLNK(statbuf.st_mode)) return "inode/symlink";
-    if(sizePath(statbuf) == 0) return "inode/empty";
-    bool match;
-    for(auto& elem : MediaTypes) {
-        match = 1;
-        for(unsigned int i = 0; i < elem.first.length(); i++) {
-                    //cout << magicNum[i] << " compared to " << elem.first[i] << "\n";
-            if(magicNum[i] != elem.first[i]) {
-                    match = 0;
-            }
-        }
-        if(match) return elem.second;
-    }
-    return "application/octet-data";
-}
 
 
 
