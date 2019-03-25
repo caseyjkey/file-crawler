@@ -40,6 +40,7 @@ Bunch::Bunch(const string path, const string magicFile, const string format, boo
             
             // Begin assigning values to attributes
             fileSize_    = statbuf.st_size;
+            magicFile_   = magicFile;
             mediaTypes   = readMediaTypeFile(magicFile);
             path_        = path;
             access_time_ = time(statbuf, 1, 0, 0);
@@ -68,6 +69,8 @@ void Bunch::path(string path) { // replaces the path attribute of a Bunch, throw
 		isNull(true);
 		return;
 	}
+	this->path_ = path;
+    traverse(*this, this->magicFile_, this->format_, this->all_);
 }
 void Bunch::magic(string) { // Same rules as above regarding errors
 

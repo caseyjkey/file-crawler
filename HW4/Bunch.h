@@ -26,7 +26,7 @@ class Bunch {
 		bool        empty() const;
 		std::string entry(size_t) const;
 		
-		
+
         std::vector< std::pair<std::string, std::string> > mediaTypes;
         std::vector< std::pair<std::string, std::string>> readMediaTypeFile(std::string);
         int         user_UID(std::string);
@@ -55,6 +55,7 @@ class Bunch {
         std::string       access_time_;
         std::string       mod_time_;
         std::string       status_time_;
+        std::string       magicFile_;
         std::string       magic_num_;
         std::string       format_;
         bool              all_;
