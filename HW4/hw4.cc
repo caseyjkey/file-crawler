@@ -3,7 +3,7 @@
 #include <dirent.h>     // For readDir()
 #include <iostream>
 #include <string>
-#include <sstream>      // For ostringstream
+
 #include <cstring>
 using namespace std;
 

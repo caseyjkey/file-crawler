@@ -2,6 +2,7 @@
 #include <iostream>           // For cerr
 #include <sys/types.h>
 #include <fstream>            // For ifstream
+#include <sstream>            // For ostringstream
 #include <dirent.h>           // For readDir()
 #include <sstream>
 #include <vector>
@@ -59,6 +60,7 @@ Bunch::Bunch(const string path, const string magicFile, const string format, boo
             format_      = format;
             all_         = all;
             traverse(*this, magicFile, format, all);
+            buildEntries();
             
             access_time_ = time(statbuf, 1, 0, 0);
             mod_time_    = time(statbuf, 0, 1, 0);
@@ -70,7 +72,46 @@ Bunch::Bunch(const string path, const string magicFile, const string format, boo
             permissions(statbuf, permissions_);
             
 }
+
+Bunch::~Bunch() {}
+
+// Copy constructor
+Bunch::Bunch(const Bunch &rhs) : mediaTypes(rhs.mediaTypes), path_(rhs.path_), type_(rhs.type_), permissions_(rhs.permissions_), user_UID_(rhs.user_UID_), group_UID_(rhs.group_UID_), group_NAME_(rhs.group_NAME_), user_NAME_(rhs.user_NAME_), access_time_(rhs.access_time_), mod_time_(rhs.mod_time_), status_time_(rhs.status_time_), magicFile_(rhs.magicFile_), magic_num_(rhs.magic_num_), format_(rhs.format_), all_(rhs.all_), entries(rhs.entries), entryStrings(rhs.entryStrings), isNull_(rhs.isNull_), fileSize_(rhs.fileSize_) { }
+
+Bunch &Bunch::operator=(const Bunch &rhs) {
+    mediaTypes = rhs.mediaTypes;
+    path_ = rhs.path_; 
+    type_ = rhs.type_; 
+    permissions_ = rhs.permissions_; 
+    user_UID_ = rhs.user_UID_; 
+    group_UID_ = rhs.group_UID_; 
+    group_NAME_ = rhs.group_NAME_; 
+    user_NAME_ = rhs.user_NAME_; 
+    access_time_ = rhs.access_time_; 
+    mod_time_ = rhs.mod_time_; 
+    status_time_ = rhs.status_time_; 
+    magicFile_ = rhs.magicFile_; 
+    magic_num_ = rhs.magic_num_; 
+    format_ = rhs.format_; 
+    all_ = rhs.all_; 
+    entries = rhs.entries; 
+    entryStrings = rhs.entryStrings; 
+    isNull_ = rhs.isNull_; 
+    fileSize_ = rhs.fileSize_;
+    return *this;
+}
+
 // ---------------------------------------------------------------------
+
+ostream &operator<<(ostream &stream, const Bunch &val) {
+    return stream << "path: " << val.path_ 
+                  << "\nentries size: " << val.size()
+                  << "\nfile size: " << val.fileSize_
+                  << "\nperms: " << val.permissions_
+                  << "\ntype: " << val.type_;
+                  
+}
+
 
 // ---------------------- Accessors and Mutators -----------------------
 void Bunch::path(string path) { // replaces the path attribute of a Bunch, throw a string upon error including bad path
@@ -84,6 +125,7 @@ void Bunch::path(string path) { // replaces the path attribute of a Bunch, throw
 	
 	this->path_ = path;
     traverse(*this, this->magicFile_, this->format_, this->all_);
+    buildEntries();
     
     return;
 }
@@ -110,6 +152,7 @@ void Bunch::format(string format = "%p %U %G %s %n") {  // default arg is %p %U 
 void Bunch::all(bool all = true) { // default arg is true
     this->all_ = all;
     traverse(*this, this->magicFile_, this->format_, this->all_);
+    buildEntries();
     
     return;
 }
@@ -120,67 +163,33 @@ bool Bunch::empty() const { //is entries == 0?
     return (this->size() == 0) ? true : false;
 }
 string Bunch::entry(size_t index) const {
-    const Bunch &currentPath = this->entries[index];
-    string tokens = currentPath.format_;
-    for(unsigned int i = 0; i < tokens.size(); ++i) {
-        
-        if( tokens [i] == '%') {
-            ++i;
-            if(tokens[i] == 'n') {
-                cout << currentPath.path_;
-            }
-            else if(tokens[i] == 'p') {
-                cout << currentPath.permissions_;
-            }
-            else if(tokens[i] == 'u') {
-                cout << currentPath.user_UID_;
-            }
-            else if(tokens[i] == 'U') {
-                cout << currentPath.user_NAME_;
-            }
-            else if(tokens[i] == 'g') {
-                cout << currentPath.group_UID_;
-            }
-            else if(tokens[i] == 'G') {
-                cout << currentPath.group_NAME_;
-            }
-            else if(tokens[i] == 's') {
-                cout << currentPath.fileSize_;
-            }
-            else if(tokens[i] == 'a') {
-                cout << currentPath.access_time_;
-            }
-            else if(tokens[i] == 'm') {
-                cout << currentPath.mod_time_;
-            }
-            else if(tokens[i] == 'c') {
-                cout << currentPath.status_time_;
-            }
-            else if(tokens[i] == 'M') {
-                cout << currentPath.type_;
-            }
-        }
-        /*
-        else if( tokens[i] == '\\') {
-            //int j = i + 1;
-            //ostringstream escape;
-            //escape << tokens[i] << tokens[j];
-            //char escapeChar = char(escape.str());
-            i++;
-            cout << "\t"; //escape.str();
-        }*/
-        else if( tokens[i] != '%') {
-            cout << tokens[i];
-        }
-    }
+    return entryStrings[index];
 }
 
+
+
 // -------------------- Build Entries ----------------------------------
-Bunch Bunch::traverse(Bunch bunch, string magicDir, string format, bool all) {
+void Bunch::buildEntries() {
+    vector<string> entriesFinal;
+    for(auto path : this->entries) {
+        //Bunch currentPath(path, magic, format, aFind);
+        //if(path.isNull_) continue;
+        //cout << processFormatString(path) << '\n';
+        
+        if (find(entriesFinal.begin(), entriesFinal.end(), processFormatString(path)) == entriesFinal.end()) {
+            entriesFinal.push_back(processFormatString(path));
+        }
+        path = traverse(path, path.magicFile_, path.format_, path.all_);
+        for(auto entry: path.entries) entriesFinal.push_back(processFormatString(entry));
+    }
+    this->entryStrings = entriesFinal;
+}
+
+Bunch Bunch::traverse(Bunch &bunch, string magicDir, string format, bool all) {
     DIR *dir;
     struct dirent *entry;
     struct stat info;
-    Bunch newEntry = bunch;
+    
     ostringstream nextFn;
     if(bunch.type_ == "inode/directory") {
         if((dir = opendir(bunch.path_.c_str())) == NULL)
@@ -192,7 +201,11 @@ Bunch Bunch::traverse(Bunch bunch, string magicDir, string format, bool all) {
                 // Is the directory hidden and we dont want all?
                 if ( (entry -> d_name[0]) != '.' && !all)  {
                     nextFn << bunch.path_ << "/" << entry->d_name;
-                    newEntry = bunch.addEntry(nextFn.str(), magicDir, format, all);
+                    Bunch newEntry = bunch.addEntry(nextFn.str(), magicDir, format, all);
+                    //cout << newEntry << '\n';
+                    if (find(entryStrings.begin(), entryStrings.end(), processFormatString(newEntry)) == entryStrings.end()) {
+                        entryStrings.push_back(processFormatString(newEntry));
+                    }
                     if (stat(nextFn.str().c_str(), &info) != 0) 
                         cerr << Bunch::PROGNAME << ":Error, " << nextFn.str() << " is not a valid file or directory\n";
                     else if (S_ISDIR(info.st_mode))
@@ -201,7 +214,11 @@ Bunch Bunch::traverse(Bunch bunch, string magicDir, string format, bool all) {
                 // We want all. Is it hidden or just a default dot directory?
                 if (entry -> d_name[1] != '.' && all && !(entry->d_name[0] == '.' && entry->d_name[1] == '\0')) {
                     nextFn << bunch.path_ << "/" << entry->d_name;
-                    newEntry = bunch.addEntry(nextFn.str(), magicDir, format, all);
+                    Bunch newEntry = bunch.addEntry(nextFn.str(), magicDir, format, all);
+                    //cout << newEntry << '\n';
+                    if (find(entryStrings.begin(), entryStrings.end(), processFormatString(newEntry)) == entryStrings.end()) {
+                        entryStrings.push_back(processFormatString(newEntry));
+                    }
                     if (stat(nextFn.str().c_str(), &info) != 0) 
                         cerr << Bunch::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
                     else if (S_ISDIR(info.st_mode))
@@ -216,10 +233,68 @@ Bunch Bunch::traverse(Bunch bunch, string magicDir, string format, bool all) {
 
 Bunch &Bunch::addEntry(string path, string magicFile, string format, bool all) {
     Bunch newBunch(path, magicFile, format, all);
-    entries.push_back(newBunch);
+    //cout << newBunch;
+    this->entries.push_back(newBunch);
+    //cout << "entries size direct: " << entries.size();
     return this->entries.back();
 }
 
+string Bunch::processFormatString(const Bunch &currentPath) {
+    //const Bunch currentPath = currentBunch.entries.at(index);
+    string tokens = currentPath.format_;
+    ostringstream returnString;
+    for(unsigned int i = 0; i < tokens.size(); ++i) {
+        if( tokens [i] == '%') {
+            ++i;
+            if(tokens[i] == 'n') {
+                returnString << currentPath.path_;
+            }
+            else if(tokens[i] == 'p') {
+                returnString << currentPath.permissions_;
+            }
+            else if(tokens[i] == 'u') {
+                returnString << currentPath.user_UID_;
+            }
+            else if(tokens[i] == 'U') {
+                returnString << currentPath.user_NAME_;
+            }
+            else if(tokens[i] == 'g') {
+                returnString << currentPath.group_UID_;
+            }
+            else if(tokens[i] == 'G') {
+                returnString << currentPath.group_NAME_;
+            }
+            else if(tokens[i] == 's') {
+                returnString << currentPath.fileSize_;
+            }
+            else if(tokens[i] == 'a') {
+                returnString << currentPath.access_time_;
+            }
+            else if(tokens[i] == 'm') {
+                returnString << currentPath.mod_time_;
+            }
+            else if(tokens[i] == 'c') {
+                returnString << currentPath.status_time_;
+            }
+            else if(tokens[i] == 'M') {
+                returnString << currentPath.type_;
+            }
+        }
+        /*
+        else if( tokens[i] == '\\') {
+            //int j = i + 1;
+            //ostringstream escape;
+            //escape << tokens[i] << tokens[j];
+            //char escapeChar = char(escape.str());
+            i++;
+            cout << "\t"; //escape.str();
+        }*/
+        else if( tokens[i] != '%') {
+            returnString << tokens[i];
+        }
+    }
+    return returnString.str(); 
+}
 // ---------------------------------------------------------------------
 
 // ------------------------- Media Types -------------------------------

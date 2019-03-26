@@ -13,10 +13,14 @@ class Bunch {
 	
     public:
 		Bunch();
+        ~Bunch();
+        Bunch(const Bunch &);
 		Bunch(const std::string); 
 		Bunch(const std::string, const std::string);
 		Bunch(const std::string, const std::string, const std::string);
         Bunch(const std::string, const std::string,  const std::string, bool);
+        
+        Bunch & operator=(const Bunch &);
 		
         void        path(std::string); // replaces the path attribute of a Bunch, throw a std::string upon error including bad path
 		void        magic(std::string); // Same rules as above regarding errors
@@ -27,7 +31,7 @@ class Bunch {
 		std::string entry(size_t) const;
 		
 
-        std::vector< std::pair<std::string, std::string> > mediaTypes;
+        
         std::vector< std::pair<std::string, std::string>> readMediaTypeFile(std::string);
         int         user_UID(std::string);
         int         user_UID(struct stat &);
@@ -41,10 +45,12 @@ class Bunch {
         std::string inttohex(int);
         std::string readMagicNumber(std::string);
         std::string findMediaType(std::string, std::vector< std::pair<std::string, std::string> >, struct stat &);
-		Bunch       traverse(Bunch, std::string, std::string, bool);
+		Bunch       traverse(Bunch&, std::string, std::string, bool);
         Bunch       &addEntry(std::string, std::string, std::string, bool);
         
+        
         // ------------------ Bunch Attributes ----------------
+        std::vector< std::pair<std::string, std::string> > mediaTypes;
         std::string       path_;
         std::string       type_;
         std::string       permissions_;
@@ -60,15 +66,20 @@ class Bunch {
         std::string       format_;
         bool              all_;
         std::vector<Bunch> entries;
+        std::vector<std::string> entryStrings;
         
         // ------------------ Helper Attributes ---------------
         bool isNull_;
         off_t fileSize_;
-        int numberOfEntries;
         
 	private:
 		static std::string PROGNAME;
+        
+        void buildEntries();
+        std::string processFormatString(const Bunch&);
 };
+
+std::ostream &operator<<(std::ostream &, const Bunch &);
 
 #endif
 
