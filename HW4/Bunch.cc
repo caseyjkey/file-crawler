@@ -75,7 +75,7 @@ Bunch::Bunch(const string path, const string magicFile, const string format, boo
             this->entries.push_back(*this);
             
             
-            traverse(*this, magicFile, format, all);
+            traverse(*this, this->entryStrings, magicFile, format, all);
             
             
 }
@@ -131,7 +131,7 @@ void Bunch::path(string path) { // replaces the path attribute of a Bunch, throw
 	}
 	
 	this->path_ = path;
-    traverse(*this, this->magicFile_, this->format_, this->all_);
+    traverse(*this, this->entryStrings, this->magicFile_, this->format_, this->all_);
     
     return;
 }
@@ -157,7 +157,7 @@ void Bunch::format(string format = "%p %U %G %s %n") {  // default arg is %p %U 
 }
 void Bunch::all(bool all = true) { // default arg is true
     this->all_ = all;
-    traverse(*this, this->magicFile_, this->format_, this->all_);
+    traverse(*this, this->entryStrings, this->magicFile_, this->format_, this->all_);
     
     return;
 }
@@ -175,7 +175,7 @@ string Bunch::entry(size_t index) const {
 
 // -------------------- Build Entries Vector ----------------------------------
 
-Bunch Bunch::traverse(Bunch &bunch, string magicDir, string format, bool all) {
+Bunch Bunch::traverse(Bunch &bunch, vector<string> foobar, string magicDir, string format, bool all) {
     DIR *dir;
     struct dirent *entry;
     struct stat info;
@@ -187,6 +187,7 @@ Bunch Bunch::traverse(Bunch &bunch, string magicDir, string format, bool all) {
         if((dir = opendir(bunch.path_.c_str())) == NULL)
             cerr << Bunch::PROGNAME << ": " << bunch.path_ << " opendir() error\n";
         else {
+            
             while((entry = readdir(dir)) != NULL) {
                 nextFilename.str("");
                 nextFilename.clear();
@@ -199,9 +200,9 @@ Bunch Bunch::traverse(Bunch &bunch, string magicDir, string format, bool all) {
                     if (stat(newEntry.path_.c_str(), &info) != 0) 
                         cerr << Bunch::PROGNAME << ":Error, " << newEntry.path_ << " is not a valid file or directory\n";
                     else if (S_ISDIR(info.st_mode)) {
-                        Bunch addThese = traverse(newEntry, magicDir, format, all);
+                        Bunch addThese = traverse(newEntry, foobar, magicDir, format, all);
                         for(auto path : addThese.entryStrings) {
-                            entryStrings.push_back(path);
+                            foobar.push_back(path);
                         }
                         //bunch.addEntry(newEntry.path_, newEntry.magicFile_, newEntry.format_, newEntry.all_);
                     }
@@ -217,7 +218,7 @@ Bunch Bunch::traverse(Bunch &bunch, string magicDir, string format, bool all) {
                     if (stat(newEntry.path_.c_str(), &info) != 0) 
                         cerr << Bunch::PROGNAME << ":Error, " << newEntry.path_ << " is not a valid file or directory\n";
                     else if (S_ISDIR(info.st_mode))
-                        traverse(newEntry, magicDir, format, all);
+                        traverse(newEntry, foobar, magicDir, format, all);
                 }
             }
             

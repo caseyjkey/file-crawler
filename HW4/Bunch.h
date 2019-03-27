@@ -45,7 +45,7 @@ class Bunch {
         std::string inttohex(int);
         std::string readMagicNumber(std::string);
         std::string findMediaType(std::string, std::vector< std::pair<std::string, std::string> >, struct stat &);
-		Bunch       traverse(Bunch&, std::string, std::string, bool);
+		Bunch       traverse(Bunch&, std::vector<std::string>, std::string, std::string, bool);
         Bunch       &addEntry(std::string, std::string, std::string, bool);
         
         
