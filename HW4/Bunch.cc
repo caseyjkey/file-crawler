@@ -59,8 +59,6 @@ Bunch::Bunch(const string path, const string magicFile, const string format, boo
             
             format_      = format;
             all_         = all;
-            traverse(*this, magicFile, format, all);
-            buildEntries();
             
             access_time_ = time(statbuf, 1, 0, 0);
             mod_time_    = time(statbuf, 0, 1, 0);
@@ -70,6 +68,15 @@ Bunch::Bunch(const string path, const string magicFile, const string format, boo
             user_NAME_   = user_NAME(user_UID_);
             group_NAME_  = group_NAME(group_UID_);
             permissions(statbuf, permissions_);
+            
+            if (find(entryStrings.begin(), entryStrings.end(), processFormatString(*this)) == entryStrings.end()) {
+                entryStrings.push_back(processFormatString(*this));
+            }
+            this->entries.push_back(*this);
+            
+            
+            traverse(*this, magicFile, format, all);
+            
             
 }
 
@@ -125,7 +132,6 @@ void Bunch::path(string path) { // replaces the path attribute of a Bunch, throw
 	
 	this->path_ = path;
     traverse(*this, this->magicFile_, this->format_, this->all_);
-    buildEntries();
     
     return;
 }
@@ -152,7 +158,6 @@ void Bunch::format(string format = "%p %U %G %s %n") {  // default arg is %p %U 
 void Bunch::all(bool all = true) { // default arg is true
     this->all_ = all;
     traverse(*this, this->magicFile_, this->format_, this->all_);
-    buildEntries();
     
     return;
 }
@@ -168,75 +173,73 @@ string Bunch::entry(size_t index) const {
 
 
 
-// -------------------- Build Entries ----------------------------------
-void Bunch::buildEntries() {
-    vector<string> entriesFinal;
-    for(auto path : this->entries) {
-        //Bunch currentPath(path, magic, format, aFind);
-        //if(path.isNull_) continue;
-        //cout << processFormatString(path) << '\n';
-        
-        if (find(entriesFinal.begin(), entriesFinal.end(), processFormatString(path)) == entriesFinal.end()) {
-            entriesFinal.push_back(processFormatString(path));
-        }
-        path = traverse(path, path.magicFile_, path.format_, path.all_);
-        for(auto entry: path.entries) entriesFinal.push_back(processFormatString(entry));
-    }
-    this->entryStrings = entriesFinal;
-}
+// -------------------- Build Entries Vector ----------------------------------
 
 Bunch Bunch::traverse(Bunch &bunch, string magicDir, string format, bool all) {
     DIR *dir;
     struct dirent *entry;
     struct stat info;
     
-    ostringstream nextFn;
+    ostringstream nextFilename;
+    cout << "Bunch:" << bunch << "\n";
     if(bunch.type_ == "inode/directory") {
+        cout << "...was a directory\n";
         if((dir = opendir(bunch.path_.c_str())) == NULL)
             cerr << Bunch::PROGNAME << ": " << bunch.path_ << " opendir() error\n";
         else {
             while((entry = readdir(dir)) != NULL) {
-                nextFn.str("");
-                nextFn.clear();
-                // Is the directory hidden and we dont want all?
+                nextFilename.str("");
+                nextFilename.clear();
+                //Dont show a hidden file/directory
                 if ( (entry -> d_name[0]) != '.' && !all)  {
-                    nextFn << bunch.path_ << "/" << entry->d_name;
-                    Bunch newEntry = bunch.addEntry(nextFn.str(), magicDir, format, all);
-                    //cout << newEntry << '\n';
-                    if (find(entryStrings.begin(), entryStrings.end(), processFormatString(newEntry)) == entryStrings.end()) {
-                        entryStrings.push_back(processFormatString(newEntry));
+                    cout << "\nbefore";
+                    nextFilename << bunch.path_ << "/" << entry->d_name;
+                    Bunch newEntry = bunch.addEntry(nextFilename.str(), magicDir, format, all);
+                    cout << "\nafter";
+                    if (stat(newEntry.path_.c_str(), &info) != 0) 
+                        cerr << Bunch::PROGNAME << ":Error, " << newEntry.path_ << " is not a valid file or directory\n";
+                    else if (S_ISDIR(info.st_mode)) {
+                        Bunch addThese = traverse(newEntry, magicDir, format, all);
+                        for(auto path : addThese.entryStrings) {
+                            entryStrings.push_back(path);
+                        }
+                        //bunch.addEntry(newEntry.path_, newEntry.magicFile_, newEntry.format_, newEntry.all_);
                     }
-                    if (stat(nextFn.str().c_str(), &info) != 0) 
-                        cerr << Bunch::PROGNAME << ":Error, " << nextFn.str() << " is not a valid file or directory\n";
-                    else if (S_ISDIR(info.st_mode))
-                        traverse(newEntry, magicDir, format, all);
+                        
                 }
-                // We want all. Is it hidden or just a default dot directory?
+                // Show hidden files and folders, but not dot directories
                 if (entry -> d_name[1] != '.' && all && !(entry->d_name[0] == '.' && entry->d_name[1] == '\0')) {
-                    nextFn << bunch.path_ << "/" << entry->d_name;
-                    Bunch newEntry = bunch.addEntry(nextFn.str(), magicDir, format, all);
-                    //cout << newEntry << '\n';
-                    if (find(entryStrings.begin(), entryStrings.end(), processFormatString(newEntry)) == entryStrings.end()) {
-                        entryStrings.push_back(processFormatString(newEntry));
-                    }
-                    if (stat(nextFn.str().c_str(), &info) != 0) 
-                        cerr << Bunch::PROGNAME << ": stat(" << nextFn.str() << ") error\n";
+                    
+                    nextFilename << bunch.path_ << "/" << entry->d_name;
+                    Bunch newEntry = bunch.addEntry(nextFilename.str(), magicDir, format, all);
+                    
+                    
+                    if (stat(newEntry.path_.c_str(), &info) != 0) 
+                        cerr << Bunch::PROGNAME << ":Error, " << newEntry.path_ << " is not a valid file or directory\n";
                     else if (S_ISDIR(info.st_mode))
                         traverse(newEntry, magicDir, format, all);
                 }
             }
+            
             closedir(dir);
         }
     }
+    
+    cout << "returning: " << bunch << "\n\n";
     return bunch;
 }
 
 Bunch &Bunch::addEntry(string path, string magicFile, string format, bool all) {
+
     Bunch newBunch(path, magicFile, format, all);
+    cout << "\nAdding: " << newBunch << "\nto " << path_ << "\n";
     //cout << newBunch;
-    this->entries.push_back(newBunch);
-    //cout << "entries size direct: " << entries.size();
-    return this->entries.back();
+    if (find(entryStrings.begin(), entryStrings.end(), processFormatString(newBunch)) == entryStrings.end())
+        entryStrings.push_back(processFormatString(newBunch));
+
+    entries.push_back(newBunch);
+
+    return entries.back();
 }
 
 string Bunch::processFormatString(const Bunch &currentPath) {
@@ -336,7 +339,6 @@ string Bunch::findMediaType(string magicNum, vector< pair<string, string> > Medi
     for(auto& elem : MediaTypes) {
         match = 1;
         for(unsigned int i = 0; i < elem.first.length(); i++) {
-                    //cout << magicNum[i] << " compared to " << elem.first[i] << "\n";
             if(magicNum[i] != elem.first[i]) {
                     match = 0;
             }
@@ -423,9 +425,6 @@ string Bunch::time(struct stat &statbuf, bool access = 0, bool mod = 1, bool sta
 
 string Bunch::inttohex(int num) {
     // https://bit.ly/2InTEd9
-    
-    //if(num == 127) num = 137;
-    //cout << "Base 16 num: " << num << " ";
     string d = "0123456789abcdef"; //
     string res;
     if (num < 0) { 
@@ -443,14 +442,7 @@ string Bunch::inttohex(int num) {
         num /= 16;
     }
     if(res.length() == 1) res = "0" + res;
-    //cout << "Decimal result: " << res << "\n";
     return res;
 }
-
-
-
-
-
-
 
 

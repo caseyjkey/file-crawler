@@ -74,8 +74,6 @@ class Bunch {
         
 	private:
 		static std::string PROGNAME;
-        
-        void buildEntries();
         std::string processFormatString(const Bunch&);
 };
 
