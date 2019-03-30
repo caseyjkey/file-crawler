@@ -28,7 +28,7 @@ class Bunch {
 		void        all(bool); // default arg is true
 		size_t      size() const; // number of entries 
 		bool        empty() const;
-		std::string entry(size_t) const;
+		std::string entry(size_t) ;
 		
 
         
@@ -45,7 +45,7 @@ class Bunch {
         std::string inttohex(int);
         std::string readMagicNumber(std::string);
         std::string findMediaType(std::string, std::vector< std::pair<std::string, std::string> >, struct stat &);
-		Bunch       traverse(Bunch&, std::vector<std::string>, std::string, std::string, bool);
+		std::string traverse(std::string, bool);
         Bunch       &addEntry(std::string, std::string, std::string, bool);
         
         
@@ -67,6 +67,7 @@ class Bunch {
         bool              all_;
         std::vector<Bunch> entries;
         std::vector<std::string> entryStrings;
+        std::vector<std::string> m_vPath;
         
         // ------------------ Helper Attributes ---------------
         bool isNull_;

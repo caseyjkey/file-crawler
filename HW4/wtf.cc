@@ -166,9 +166,9 @@ size_t Bunch::size() const { // number of entries
 bool Bunch::empty() const { //is entries == 0?
     return (this->size() == 0) ? true : false;
 }
-string Bunch::entry(size_t index){
+string Bunch::entry(size_t index) const {
 
-    return processFormatString(entries[index]);
+    return entryStrings[index];
 }
 
 
@@ -194,19 +194,17 @@ string Bunch::traverse(string directory, bool all) {
                 
                 nextFilename << directory << "/" << entry->d_name;
                 
-                Bunch newEntry = Bunch(nextFilename.str(), magicFile_, format_, all_);
-                this->entries.push_back(newEntry);
-                this->entryStrings.push_back(processFormatString(newEntry));
-
-                string newPath = entryStrings.back();
+                //cout << nextFilename.str() << endl;
+                this->entries.push_back(Bunch(nextFilename.str(), magicFile_, format_, all_));
+                //cout << "size: " << entryStrings.size() << "\n";
+                string newEntry = entryStrings.back();
                 
-                if (stat(nextFilename.str().c_str(), &info) != 0) 
+                if (stat(nextFilename.str(), &info) != 0) 
                     cerr << Bunch::PROGNAME << ":Error, " << nextFilename.str() << " is not a valid file or directory\n";
                 
                 else if (S_ISDIR(info.st_mode))
-                {
-                    newEntry = traverse(nextFilename.str(), all);
-                }   
+                    traverse(newEntry, all);
+                    
             }
             
             // Show hidden files and folders, but not dot directories
@@ -220,11 +218,10 @@ string Bunch::traverse(string directory, bool all) {
                 string newEntry = entryStrings.back();
                 
                 
-                if (stat(nextFilename.str().c_str(), &info) != 0) 
-                    cerr << Bunch::PROGNAME << ":Error, " << nextFilename.str() << " is not a valid file or directory\n";
+                if (stat(newEntry.c_str(), &info) != 0) 
+                    cerr << Bunch::PROGNAME << ":Error, " << newEntry << " is not a valid file or directory\n";
                 else if (S_ISDIR(info.st_mode)) {
-                    
-                    //traverse(newEntry, all);
+                    traverse(newEntry, all);
                     
                 }
             }

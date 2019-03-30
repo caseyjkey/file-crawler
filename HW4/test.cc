@@ -14,7 +14,7 @@ int main() {
         Bunch b("pub/tree");			    // relative path from here
         b.format("%p\t%s\t%M\t%n");		    // align output with tabs
         Bunch c = b;
-        for (size_t i=0; i<b.size(); i++) {
+        for (size_t i=0; i<b.entries.size(); i++) {
             //cout << b << endl;
             //cout << endl;
             cout << b.entry(i) << '\n';
