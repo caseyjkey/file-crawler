@@ -1,6 +1,7 @@
 CXXFLAGS =-std=c++11 -O -Wall -Wextra -Wpedantic
 
-hw4(Bunch.o): Bunch.o
-	ar cr hw4.a Bunch.o
+hw5(Bunch.o): Bunch.o Fing.o
+	ar cr hw5.a Bunch.o
+	ar cr hw5.a Fing.o
 clean:
 	rm -f main *.o

@@ -8,67 +8,45 @@
 #include <pwd.h>
 #include <grp.h>
 
-class Bunch {
+// Credit to Jack "Mr. C" Applin
+// https://bit.ly/2UkmGQt
+
+template <typename T, typename U>
+class Dual {
+    const T t;
+    const U u;
   public:
-    ~Bunch();
-    Bunch(const Bunch &);
-    Bunch(const std::string); 
-    Bunch(const std::string, const std::string);
-    Bunch(const std::string, const std::string, const std::string);
-    Bunch(const std::string, const std::string,  const std::string, bool);
-    
-    Bunch & operator=(const Bunch &);
-    
-    void        path(std::string); // replaces the path attribute of a Bunch, throw a std::string upon error including bad path
-    void        all(bool);         // default arg is true
-    size_t      size() const;      // number of entries 
-    bool        empty() const;
-    std::string entry(size_t) const;
-    
-  private:
-    Bunch();                       // Throw an error for default constructor
-    
-    // ------------------ Bunch Attributes ----------------
-    std::string       path_;
-    
-    // -------------------- Bunch Methods -----------------
-    std::string traverse(std::string, bool);
-    Bunch       &addEntry(std::string, std::string, std::string, bool);
-    
-    std::vector<Bunch> entries;
-    std::vector<std::string> entryStrings;
-      
-    static std::string PROGNAME;
-    std::string processFormatString(const Bunch&);
+    Dual(const T &tt, const U &uu) : t(tt), u(uu) { }
+    operator T() const { return t; }
+    operator U() const { return u; }
 };
 
 class Fing {
+  static std::string PROGNAME;  
+    
   public:
     ~Fing();
     Fing(const Fing &);
-    Fing(const std::string); 
-    Fing(const std::string, const std::string);
-    Fing(const std::string, const std::string, const std::string);
-    Fing(const std::string, const std::string, const std::string, bool);
+    Fing(const std::string &, bool);
     
     Fing & operator=(const Fing &);
     
-    void        path(); 
-    void        perms() const;
-    void        uid() const;
-    void        gid() const;
-    size_t      size() const;      // number of entries 
-    void        atime() const;
-    void        mtime() const;
-    void        ctime() const;
-    
-    
-    std::string entry(size_t) ;
+    std::string                     path() const; 
+    Dual<std::string, int>          perms() const;
+    Dual<std::string, uid_t>        uid() const;
+    Dual<std::string, gid_t>        gid() const;
+    size_t                          size() const;      // number of entries 
+    Dual<std::string, time_t>       atime() const;
+    Dual<std::string, time_t>       mtime() const;
+    Dual<std::string, time_t>       ctime() const;
       
   private:
-    
+    Fing();
+      
+      
     // ------------------ Fing Attributes ----------------
     std::string path_;
+    bool        all_;
     
     // ------------------ Helper Attributes ---------------
     off_t       fileSize_;
@@ -76,21 +54,51 @@ class Fing {
     
     // --------------------- Methods ----------------------
       
-    int         user_UID(const std::string);
-    int         user_UID(const struct stat &);
-    std::string user_NAME(int);
-    int         group_UID(const struct stat &);
-    std::string group_NAME(int);
-    int         permissions(const struct stat &, std::string &);
-    int         sizeOfPath(const struct stat &);
-    std::string time(const struct stat &, bool, bool, bool);
+    int         user_UID(const std::string) const;
+    int         user_UID(const struct stat &) const;
+    std::string user_NAME(uid_t) const;
+    int         group_UID(const struct stat &) const;
+    std::string group_NAME(gid_t) const;
+    std::string permissions() const;
+    std::string time(bool, bool, bool) const;
     bool        empty() const;
     
-    std::string inttohex(int);
 };
 
-
 std::ostream &operator<<(std::ostream &, const Fing &);
+
+class Bunch {
+  public:
+    ~Bunch();
+    Bunch(const Bunch &);
+    
+    Bunch(const std::string);
+    Bunch(const std::string, bool);
+    
+    Bunch & operator=(const Bunch &);
+    
+    std::string        path(const std::string &); // replaces the path attribute of a Bunch, throw a std::string upon error including bad path
+    void        	   all(bool);         // default arg is true
+    size_t     		   size() const;      // number of entries 
+    bool       		   empty() const;
+    Fing		       entry(size_t) const;
+    
+  private:
+    Bunch();                       // Throw an error for default constructor
+    
+    // ------------------ Bunch Attributes ----------------
+    std::string       path_;
+    bool              all_;
+    
+    // -------------------- Bunch Methods -----------------
+    std::string traverse(const std::string &);
+    
+    std::vector<Fing> entries;
+    std::vector<std::string> entryStrings;
+      
+    static std::string PROGNAME;
+    std::string processFormatString(const Bunch&);
+};
 
 #endif
 

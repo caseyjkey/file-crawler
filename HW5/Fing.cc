@@ -1,88 +1,77 @@
-#include <stdexcept> # used for runtime error
+#include "Bunch.h"
+#include <stdexcept>  // for runtime_error
+#include <sstream>    // For ostringstream
 
 using namespace std;
 
 string Fing::PROGNAME = "hw5";
 
-Fing::Fing() : Fing::Fing("") { }
+Fing::Fing() { }
 
 Fing::~Fing() {}
 
-Fing::Fing(const string path) {
-    path_ = path;
+Fing::Fing(const string &path, const bool all) {
     int openFile = lstat(path.c_str(), &statbuf);
     if(openFile != 0) 
-        throw runtime_error(PROGNAME + ": cannot access the magic file '" + path + "': No such file or directory\n");
+        throw runtime_error(PROGNAME + ": cannot access '" + path + "': No such file or directory\n");
+    
+    path_ = path;
+    all_  = all;
+    
 }
 
-Fing::Fing(const Fing & rhs) : path_(rhs.path_) { }
+Fing::Fing(const Fing & rhs) : path_(rhs.path_), all_(rhs.all_) { }
 
 Fing &Fing::operator=(const Fing & rhs) {
     path_ = rhs.path_;
+    all_ = rhs.all_;
+    
+    return *this;
 }
     
-string Fing::path() { 
+string Fing::path() const { 
     return path_;
 }
 
-void Fing::perms() const {
-    
-}
+Dual<string, int> Fing::perms() const { return {permissions(), int(statbuf.st_mode)}; }
 
-void Fing::uid() const {
-    
-}
+Dual<string, uid_t> Fing::uid() const { return {user_NAME(statbuf.st_uid), statbuf.st_uid}; }
 
-void Fing::gid() const {
-    
-}
+Dual<string, gid_t> Fing::gid() const { return {group_NAME(statbuf.st_gid), statbuf.st_gid}; }
 
-size_t Fing::size() const {      // number of entries
-    return statbuf.st_size;
-}
+size_t Fing::size() const { return statbuf.st_size; }
 
-void Fing::atime() const {
-    return time(statbuf, 1, 0, 0);
-}
+Dual<string, time_t> Fing::atime() const { return {time(1, 0, 0), statbuf.st_atime}; }
 
-void Fing::mtime() const {
-    return time(statbuf, 0, 1, 0);
-}
+Dual<string, time_t> Fing::mtime() const { return {time(0, 1, 0), statbuf.st_mtime}; }
 
-void Fing::ctime() const {
-    return time(statbuf, 0, 0, 1);
-}
+Dual<string, time_t> Fing::ctime() const { return {time(0, 0, 1), statbuf.st_ctime}; }
 
-int Bunch::user_UID(struct stat & statbuf) {
-    // https://ibm.co/2GwdIIR
-    // Option to access via stat
-    return static_cast<int>(statbuf.st_uid);
-}
-string Bunch::user_NAME(int uid) {
+
+string Fing::user_NAME(uid_t uid) const {
     struct passwd *pwd;
     if((pwd = getpwuid(uid)) != NULL)
         return pwd->pw_name;
     else
-        throw runtime_error(PROGNAME + ": " + uid + " not found in user database\n");
+        throw runtime_error(PROGNAME + ": requested uid not found in user database\n");
     return "uid not found";
 }
-int Bunch::group_UID(struct stat &statbuf) {
-    return statbuf.st_gid;
-}
-string Bunch::group_NAME(int gid) {
+
+string Fing::group_NAME(gid_t gid) const {
     struct group *grp;
     if((grp = getgrgid(gid)) != NULL)
         return grp->gr_name;
     else
-        throw runtime_error(PROGNAME + ": " + gid + " not found in group database\n");
+        throw runtime_error(PROGNAME + ": requested gid not found in group database\n");
     return "gid not found";
 }
-int Bunch::permissions(struct stat &statbuf, string &output) {
+
+string Fing::permissions() const {
     ostringstream os;
     if(S_ISDIR(statbuf.st_mode)) os <<  "d";
     else if(S_ISLNK(statbuf.st_mode)) os << "l";
     else if(S_ISREG(statbuf.st_mode)) os << "-";
-    else throw runtime_error(PROGNAME + ": " + path_ + " is an undefined file type, wtf?!\n");
+    //else throw runtime_error(PROGNAME + ": " + path_ + " is an undefined file type, wtf?!\n");
     os << (statbuf.st_mode & S_IRUSR ? 'r' : '-');
     os << (statbuf.st_mode & S_IWUSR ? 'w' : '-');
     os << (statbuf.st_mode & S_IXUSR ? 'x' : '-');
@@ -94,13 +83,11 @@ int Bunch::permissions(struct stat &statbuf, string &output) {
     os << (statbuf.st_mode & S_IROTH ? 'r' : '-');
     os << (statbuf.st_mode & S_IWOTH ? 'w' : '-');
     os << (statbuf.st_mode & S_IXOTH ? 'x' : '-');
-    output = os.str();
-    return 0;
+
+    return os.str();
 }
-int Bunch::sizeOfPath(struct stat &statbuf) {
-    return statbuf.st_size;
-}
-string Bunch::time(struct stat &statbuf, bool access = 0, bool mod = 1, bool status = 0) {
+
+string Fing::time(bool access = 0, bool mod = 1, bool status = 0) const {
     time_t fileTime;
     if(mod) {
         fileTime = statbuf.st_mtime;
@@ -117,27 +104,3 @@ string Bunch::time(struct stat &statbuf, bool access = 0, bool mod = 1, bool sta
     string timeOutput(buf);
     return timeOutput;
 }
-
-
-string Bunch::inttohex(int num) {
-    // https://bit.ly/2InTEd9
-    string d = "0123456789abcdef"; //
-    string res;
-    if (num < 0) { 
-        stringstream ss;
-        ss << hex << num;
-        string res = ss.str();
-        int x = 0;
-        for(unsigned int i = 0; i < res.length(); i++)
-            if(res[i] == 'f') x++;
-        string res1 = res.substr(x, res.length());
-        return res1;
-    }
-    while(num > 0) {
-        res = d[num % 16] + res;
-        num /= 16;
-    }
-    if(res.length() == 1) res = "0" + res;
-    return res;
-}
-
