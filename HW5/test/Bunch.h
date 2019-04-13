@@ -93,7 +93,6 @@ class Bunch {
     std::string traverse(const std::string &);
     
     std::vector<Fing> entries;
-    std::vector<std::string> entryStrings;
       
     static std::string PROGNAME;
     std::string processFormatString(const Bunch&);

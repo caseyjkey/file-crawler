@@ -35,9 +35,6 @@ Bunch::Bunch(const string path, bool all = false) {
             
             Fing newEntry = Fing(path_, all_);
             entries.push_back(newEntry);
-            entryStrings.push_back(newEntry.path());
-
-            
         
             traverse(path_);
             
@@ -121,9 +118,7 @@ string Bunch::traverse(const string &directory) {
                 
                 Fing newEntry = Fing(nextFilename.str(), all_);
                 entries.push_back(newEntry);
-                entryStrings.push_back(newEntry.path());
 
-                string newPath = entryStrings.back();
                 
                 if (stat(nextFilename.str().c_str(), &info) != 0) 
                     throw runtime_error(PROGNAME + ":Error, " + nextFilename.str() + " is not a valid file or directory\n");
@@ -139,9 +134,6 @@ string Bunch::traverse(const string &directory) {
                 
                 Fing newEntry = Fing(nextFilename.str(), all_);
                 entries.push_back(newEntry);
-                entryStrings.push_back(newEntry.path());
-
-                string newPath = entryStrings.back();
                 
                 if (stat(nextFilename.str().c_str(), &info) != 0) 
                     throw runtime_error(PROGNAME + ":Error, " + nextFilename.str() + " is not a valid file or directory\n");
