@@ -77,7 +77,7 @@ class Bunch {
     Bunch & operator=(const Bunch &);
     
     std::string        path(const std::string &); // replaces the path attribute of a Bunch, throw a std::string upon error including bad path
-    void        	   all(bool);         // default arg is true
+    void        	   all(bool = true);         // default arg is true
     size_t     		   size() const;      // number of entries 
     bool       		   empty() const;
     Fing		       entry(size_t) const;
