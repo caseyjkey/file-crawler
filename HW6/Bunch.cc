@@ -12,8 +12,6 @@
 #include <grp.h>
 using namespace std;
 
-string Bunch::PROGNAME = "hw6";
-
 // ---------------------- Constructors ---------------------------------
 
 Bunch::Bunch(const string &path) {
@@ -22,7 +20,7 @@ Bunch::Bunch(const string &path) {
             // Check if the path is okay
             int openFile = lstat(path.c_str(), &statbuf);
             if(openFile != 0)
-                throw runtime_error(PROGNAME + ": cannot access the path '" + path + "': No such file or directory\n");
+                throw "cannot access the path '" + path + "': No such file or directory\n";
             
             
             // Begin assigning values to attributes
@@ -44,18 +42,56 @@ Bunch::~Bunch() {}
 // Copy constructor
 Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_), all_(rhs.all_), entries(rhs.entries), entryStrings(rhs.entryStrings) { }
 
+// ---------------------- Operators ------------------------------------
+
 Bunch &Bunch::operator=(const Bunch &rhs) {
     path_ = rhs.path_; 
     all_ = rhs.all_; 
     return *this;
 }
 
-// ---------------------------------------------------------------------
+
+//TODO: make statbuf an attribute of a fing
+Bunch Bunch::operator+(const Bunch & rhs) {
+    
+}
+Bunch Bunch::operator-(const Bunch &);
+
+Bunch Bunch::operator+=(const Bunch &);
+Bunch Bunch:::operator-=(const Bunch &);
+
+
+// Can number of fings be different, like one be a subset?
+bool operator==(const Bunch & rhs) const {
+    struct stat statbuf1;
+    struct stat statbuf2;
+    
+    if(this.size() != rhs.size()) return false;
+    
+    for(size_t i = 0; i < entries.size(); i++) {
+        Fing fing1 = entries[i];
+        lstat(fing1.path().c_str(), statbuf1);
+        for(size_t i = 0; i < entries.size(); i++) {
+            Fing fing2 = rhs.entries[i];
+            lstat(fing2.path().c_str(), statbuf2);
+            if(statbuf2.st_dev != statbuf1.st_dev || statbuf2.st_ino != statbuf1.st_ino) 
+                return false;
+        }
+    }
+    
+    return true;
+}
+bool operator!=(const Bunch & rhs) const {
+    return (this == rhs) ? return false : return false;
+}
+
+bool operator bool() const { return empty(); }
 
 ostream &operator<<(ostream &stream, Bunch &val) {
     return stream << "empty?: " << val.empty();    
 }
 
+// ---------------------------------------------------------------------
 
 // ---------------------- Accessors and Mutators -----------------------
 
@@ -93,7 +129,7 @@ string Bunch::traverse(const string &directory) {
                 string newPath = entryStrings.back();
                 
                 if (stat(nextFilename.str().c_str(), &info) != 0) 
-                    throw runtime_error(PROGNAME + ":Error, " + nextFilename.str() + " is not a valid file or directory\n");
+                    throw "Error, " + nextFilename.str() + " is not a valid file or directory\n";
                 
                 else if (S_ISDIR(info.st_mode))
                     traverse(nextFilename.str());

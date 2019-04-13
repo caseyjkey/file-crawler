@@ -1,10 +1,7 @@
 #include "Bunch.h"
-#include <stdexcept>  // for runtime_error
 #include <sstream>    // For ostringstream
 
 using namespace std;
-
-string Fing::PROGNAME = "hw5";
 
 Fing::Fing() { }
 
@@ -14,7 +11,7 @@ Fing::Fing(const string &path) {
 	struct stat statbuf;
     int openFile = lstat(path.c_str(), &statbuf);
     if(openFile != 0) 
-        throw runtime_error(PROGNAME + ": cannot access '" + path + "': No such file or directory\n");
+        throw "cannot access '" + path + "': No such file or directory\n";
     
     path_ = path;
     
@@ -77,20 +74,16 @@ Dual<string, time_t> Fing::ctime() const {
 
 string Fing::user_NAME(uid_t uid) const {
     struct passwd *pwd;
-    if((pwd = getpwuid(uid)) != NULL)
-        return pwd->pw_name;
-    else
-        throw runtime_error(PROGNAME + ": requested uid not found in user database\n");
-    return "uid not found";
+    if((pwd = getpwuid(uid)) == NULL)
+        throw "requested uid not found in user database\n";
+    return pwd->pw_name;
 }
 
 string Fing::group_NAME(gid_t gid) const {
     struct group *grp;
     if((grp = getgrgid(gid)) != NULL)
-        return grp->gr_name;
-    else
-        throw runtime_error(PROGNAME + ": requested gid not found in group database\n");
-    return "gid not found";
+        throw "requested gid not found in group database\n");
+    return grp->gr_name;
 }
 
 string Fing::permissions() const {

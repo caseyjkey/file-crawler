@@ -22,7 +22,6 @@ class Dual {
 };
 
 class Fing {
-  static std::string PROGNAME;  
     
   public:
     ~Fing();
@@ -82,6 +81,8 @@ class Bunch {
 	
 	bool operator==(const Bunch &) const;
 	bool operator!=(const Bunch &) const;
+    
+    bool operator bool();
 	
     
     size_t     		   size() const;      // number of entries 
@@ -100,7 +101,6 @@ class Bunch {
     std::vector<Fing> entries;
     std::vector<std::string> entryStrings;
       
-    static std::string PROGNAME;
     std::string processFormatString(const Bunch&);
 };
 

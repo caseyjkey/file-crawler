@@ -19,6 +19,8 @@ void dump(string label, const Bunch &b) {
 }
 
 int main() {
+    Bunch obj = Bunch();
+    bool bit = obj;
     try {
 	const auto home = getpwnam("cs253")->pw_dir; // cs253’s home dir
 	if (chdir(home) != 0)			     // go to ~cs253
