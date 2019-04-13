@@ -52,6 +52,7 @@ Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_), all_(rhs.all_), entries(rhs.e
 Bunch &Bunch::operator=(const Bunch &rhs) {
     path_ = rhs.path_; 
     all_ = rhs.all_; 
+    traverse(path_);
     return *this;
 }
 
@@ -75,7 +76,7 @@ string Bunch::path(const string &path) { // replaces the path attribute of a Bun
     return path_;
 }
 
-void Bunch::all(bool all = true) { // default arg is true
+void Bunch::all(bool all) { // default arg is true
     all_ = all;
     traverse(path_);
     
