@@ -52,6 +52,8 @@ Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_), all_(rhs.all_), entries(rhs.e
 Bunch &Bunch::operator=(const Bunch &rhs) {
     path_ = rhs.path_; 
     all_ = rhs.all_; 
+    entries.clear();
+    entries.push_back(Fing(path_, all_));
     traverse(path_);
     return *this;
 }
