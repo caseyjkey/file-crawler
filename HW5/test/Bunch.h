@@ -90,6 +90,7 @@ class Bunch {
     bool              all_;
     
     // -------------------- Bunch Methods -----------------
+    void updatePath();
     std::string traverse(const std::string &);
     
     std::vector<Fing> entries;

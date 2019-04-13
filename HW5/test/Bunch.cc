@@ -44,14 +44,12 @@ Bunch::Bunch(const string path, bool all = false) {
 Bunch::~Bunch() {}
 
 // Copy constructor
-Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_), all_(rhs.all_), entries(rhs.entries), entryStrings(rhs.entryStrings) { }
+Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_), all_(rhs.all_), entries(rhs.entries) { }
 
 Bunch &Bunch::operator=(const Bunch &rhs) {
     path_ = rhs.path_; 
     all_ = rhs.all_; 
-    entries.clear();
-    entries.push_back(Fing(path_, all_));
-    traverse(path_);
+    updatePath();
     return *this;
 }
 
@@ -70,15 +68,14 @@ string Bunch::path(const string &path) { // replaces the path attribute of a Bun
 		throw runtime_error(PROGNAME + ": cannot access the path '" + path + "': No such file or directory\n");
 	
 	path_ = path;
-    traverse(path_);
+    updatePath();
     
     return path_;
 }
 
 void Bunch::all(bool all) { // default arg is true
     all_ = all;
-    traverse(path_);
-    
+    updatePath();
     return;
 }
 size_t Bunch::size() const { // number of entries
@@ -96,6 +93,7 @@ Fing Bunch::entry(size_t index) const {
     return entries[index];
 }
 
+// ---------------------------------------------------------------------
 
 
 // ---------------------------- Traverse ----------------------------------
@@ -149,6 +147,16 @@ string Bunch::traverse(const string &directory) {
     }
     
     return directory;
+}
+
+// ---------------------------------------------------------------------
+
+// updatePath: clears out old entries and traverses
+void Bunch::updatePath() {
+    entries.clear();
+    entries.push_back(Fing(path_, all_));
+    traverse(path_);
+    return;
 }
 
 
