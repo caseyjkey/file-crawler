@@ -1,0 +1,9 @@
+#! /usr/bin/perl -TCDSAL
+
+use 5.14.2;
+use utf8;
+
+my $width = $ARGV[0] || $ENV{COLUMNS} || 80;
+
+say map {$_ % 10} 1..$width;
+say map {sprintf "%10d",$_} 1..$width/10;
