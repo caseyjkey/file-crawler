@@ -102,6 +102,12 @@ bool Bunch::empty() const { //is entries == 0?
     return (size() == 0) ? true : false;
 }
 const Fing * Bunch::entry(size_t index) const {
+    stringstream ss;
+    if(index > entries.size()){
+        ss << "expected number less than " << entries.size() << " but received " << index << "\n";
+        throw ss.str();
+    }
+    
     return &entries[index];
 }
 
