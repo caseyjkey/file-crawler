@@ -15,11 +15,6 @@ using namespace std;
 
 string Bunch::PROGNAME = "hw5";
 
-// ------------------- Default magic-file ------------------------------ 
-const string csDir = getpwnam("cs253") -> pw_dir; // reads the directory of cs253 user
-const string magicFile = csDir + "/pub/media-types";
-// ---------------------------------------------------------------------
-
 // ---------------------- Constructors ---------------------------------
 //Bunch::Bunch() { }
 
@@ -30,7 +25,7 @@ Bunch::Bunch(const string path, bool all = false) {
             // Check if the path is okay
             int openFile = lstat(path.c_str(), &statbuf);
             if(openFile != 0)
-                throw runtime_error(PROGNAME + ": cannot access the path '" + path + "': No such file or directory\n");
+                throw PROGNAME + ": cannot access the path '" + path + "' thoe: No such file or directory\n";
             
             
             // Begin assigning values to attributes

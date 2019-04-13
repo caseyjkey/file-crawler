@@ -14,7 +14,7 @@ Fing::Fing(const string &path, const bool all) {
 	struct stat statbuf;
     int openFile = lstat(path.c_str(), &statbuf);
     if(openFile != 0) 
-        throw runtime_error(PROGNAME + ": cannot access '" + path + "': No such file or directory\n");
+        throw PROGNAME + ": buh cannot access '" + path + "': No such file or directory\n";
     
     path_ = path;
     all_  = all;
@@ -82,7 +82,7 @@ string Fing::user_NAME(uid_t uid) const {
     if((pwd = getpwuid(uid)) != NULL)
         return pwd->pw_name;
     else
-        throw runtime_error(PROGNAME + ": requested uid not found in user database\n");
+        throw PROGNAME + ": requested uid not found in user database\n";
     return "uid not found";
 }
 
@@ -91,7 +91,7 @@ string Fing::group_NAME(gid_t gid) const {
     if((grp = getgrgid(gid)) != NULL)
         return grp->gr_name;
     else
-        throw runtime_error(PROGNAME + ": requested gid not found in group database\n");
+        throw PROGNAME + ": requested gid not found in group database\n";
     return "gid not found";
 }
 

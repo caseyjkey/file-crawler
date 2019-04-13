@@ -14,7 +14,7 @@ Fing::Fing(const string &path, const bool all) {
 	struct stat statbuf;
     int openFile = lstat(path.c_str(), &statbuf);
     if(openFile != 0) 
-        throw runtime_error(PROGNAME + ": cannot access '" + path + "': No such file or directory\n");
+        throw PROGNAME + ": buh cannot access '" + path + "': No such file or directory\n";
     
     path_ = path;
     all_  = all;
