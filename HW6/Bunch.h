@@ -99,9 +99,6 @@ class Bunch {
     std::string traverse(const std::string &);
     
     std::vector<Fing> entries;
-    std::vector<std::string> entryStrings;
-      
-    std::string processFormatString(const Bunch&);
 };
 
 #endif
