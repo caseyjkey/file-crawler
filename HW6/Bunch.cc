@@ -22,37 +22,33 @@ Bunch::Bunch(const string &path) {
             if(openFile != 0)
                 throw "Cannot access the path '" + path + "': no such file or directory.\n";
             
-            
             // Begin assigning values to attributes
             path_        = path;
             entries.push_back(Fing(path_));
-        
             traverse(path_);
-            
-            
 }
 
 // Dtor
 Bunch::~Bunch() {}
 
 // Copy Ctor
-Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_), all_(rhs.all_), entries(rhs.entries) { }
+Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_), entries(rhs.entries) { }
 
 // ---------------------- Operators ------------------------------------
 
 Bunch &Bunch::operator=(const Bunch &rhs) {
     path_ = rhs.path_; 
-    all_ = rhs.all_; 
     updatePath();
     return *this;
 }
 
+/* Used for set sorting
 struct path_compare {
     bool operator() (const Fing& x, const Fing& y) const {
         return x.path_.compare(y.path_) < 0;
     }
 };
-
+*/
 
 //TODO: make statbuf an attribute of a fing
 // Creating a set from vector: https://bit.ly/2Ivowaf
@@ -66,23 +62,44 @@ Bunch Bunch::operator+(const Bunch & rhs) const {
     size = rhs.entries.size();
     for( unsigned i = 0; i < size; ++i ) s.insert( rhs.entries[i] );
     */
-    Fing returnFing = *this;
+    Bunch freshBunch = *this;
     
     for(const auto &newFing : rhs.entries) {
-        returnFing.addEntry(newFing);
+        freshBunch.addEntry(newFing);
     }
     
-    return returnFing;
+    return freshBunch;
 }
-Bunch Bunch::operator-(const Bunch &) const;
+Bunch Bunch::operator-(const Bunch &rhs) const {
+    Bunch freshBunch = *this;
+    for(size_t i = 0; i < size(); i++) {
+        for(const auto &rhsFing : rhs.entries)
+            if(freshBunch.entries[i] == rhsFing) 
+                freshBunch.entries.erase(freshBunch.entries.begin() + i);
+    }
+    return freshBunch;
+}
 
-Bunch Bunch::operator+=(const Bunch &) const;
-Bunch Bunch:::operator-=(const Bunch &) const;
+Bunch Bunch::operator+=(const Bunch &rhs) {
+    for(const auto &newFing : rhs.entries) {
+        addEntry(newFing);
+    }
+    
+    return *this;
+}
+Bunch Bunch::operator-=(const Bunch &rhs) {
+    for(size_t i = 0; i < size(); i++) {
+        for(const auto &rhsFing : rhs.entries)
+            if(entries[i] == rhsFing) 
+                entries.erase(entries.begin() + i);
+    }
+    return *this;
+}
 
 
 // Can number of fings be different, like one be a subset?
-bool operator==(const Bunch & rhs) const {
-    if(this.size() != rhs.size()) return false;
+bool Bunch::operator==(const Bunch &rhs) const {
+    if(this->size() != rhs.size()) return false;
 
     bool fingFound = false;
     
@@ -99,11 +116,11 @@ bool operator==(const Bunch & rhs) const {
     
     return fingFound;
 }
-bool operator!=(const Bunch & rhs) const {
-    return (this == rhs) ? return false : return false;
+bool Bunch::operator!=(const Bunch & rhs) const {
+    return (*this == rhs) ? false : true;
 }
 
-explicit operator bool() const { return empty(); }
+Bunch::operator bool() const { return empty(); }
 
 ostream &operator<<(ostream &stream, Bunch &val) {
     return stream << "empty?: " << val.empty();    
@@ -122,7 +139,7 @@ bool Bunch::empty() const { //is entries == 0?
 const Fing * Bunch::entry(size_t index) const {
     stringstream ss;
     if(index > entries.size()){
-        ss << "expected number less than " << entries.size() << " but received " << index << "\n";
+        ss << "expected 0 <= index <= " << entries.size() << " but received index " << index << "\n";
         throw ss.str();
     }
     
@@ -134,14 +151,17 @@ string Bunch::path() const {
 }
 
 bool Bunch::addEntry(const Fing &newFing) {
-    // Check if this entry exists
-    for(const auto &oldFing : entries) {
-            if() 
-                entries.push_back(newFing);
-            else return false;
+    bool fingFound = false;
+    
+    for(const auto &fing : entries) {
+        if(fing == newFing) { 
+            fingFound = true;
+            break;
+        }
     }
-    // Successfully added the Fing to entries
-    return true;
+    
+    if(!fingFound) entries.push_back(newFing);
+    return !fingFound;
 }
 // ------------------------------------------------------------------------
 
@@ -157,13 +177,14 @@ string Bunch::traverse(const string &directory) {
     
     if((dir = opendir(directory.c_str())) != NULL) {
         while((entry = readdir(dir)) != NULL) {
-            nextFilename.str("").clear();
+            nextFilename.str("");
+            nextFilename.clear();
             //Dont show a hidden file/directory
-            if ( (entry -> d_name[0]) != '.' && !all_)  {
+            if ( (entry -> d_name[0]) != '.')  {
                 
                 nextFilename << directory << "/" << entry->d_name;
                 
-                Fing newEntry = Fing(nextFilename.str(), all_);
+                Fing newEntry = Fing(nextFilename.str());
                 entries.push_back(newEntry);
                 
                 if (stat(nextFilename.str().c_str(), &info) != 0) 
