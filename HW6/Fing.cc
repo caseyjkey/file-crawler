@@ -24,6 +24,15 @@ Fing &Fing::operator=(const Fing & rhs) {
     
     return *this;
 }
+
+bool Fing::operator==(const Fing & rhs) {
+    struct stat statbuf;
+    struct stat statbufRhs;
+    lstat(fing1.path().c_str(), statbuf);
+    lstat(fing2.path().c_str(), statbufRhs);
+
+    return (statbufRhs.st_dev == statbuf.st_dev && statbufRhs.st_ino == statbuf.st_ino);
+}
     
 string Fing::path() const { 
     return path_;

@@ -24,11 +24,12 @@ class Dual {
 class Fing {
     
   public:
-    ~Fing();
-    Fing(const Fing &);
-    Fing(const std::string &);
+    ~Fing(); // Dtor
+    Fing(const Fing &); // Copy Ctor
+    Fing(const std::string &); // Ctor
     
     Fing & operator=(const Fing &);
+    bool operator==(const Fing &) const;
     
     std::string                     path() const; 
     Dual<std::string, int>          perms() const;
@@ -40,7 +41,7 @@ class Fing {
     Dual<std::string, time_t>       ctime() const;
       
   private:
-    Fing();
+    Fing(); // No-arg Ctor is an Error
       
       
     // ------------------ Fing Attributes ----------------
@@ -73,8 +74,8 @@ class Bunch {
     
     Bunch &operator=(const Bunch &);
 	
-	Bunch operator+(const Bunch &);
-	Bunch operator-(const Bunch &);
+	Bunch operator+(const Bunch &) const;
+	Bunch operator-(const Bunch &) const;
 	
 	Bunch operator+=(const Bunch &);
 	Bunch operator-=(const Bunch &);
@@ -82,20 +83,24 @@ class Bunch {
 	bool operator==(const Bunch &) const;
 	bool operator!=(const Bunch &) const;
     
-    bool operator bool();
+    explicit operator bool() const;
 	
     
     size_t     		   size() const;      // number of entries 
     bool       		   empty() const;
-    Fing		       entry(size_t) const;
+    const Fing *       entry(size_t) const;
+    bool               addEntry(const Fing &); // we could use smart pointers to store references to Fings in entries
+    std::string        path() const;
     
   private:
     Bunch();                       // Throw an error for default constructor
     
     // ------------------ Bunch Attributes ----------------
-    std::string       path_;
+    
+    std::string        path_;
     
     // -------------------- Bunch Methods -----------------
+    void updatePath();
     std::string traverse(const std::string &);
     
     std::vector<Fing> entries;
