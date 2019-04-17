@@ -33,6 +33,10 @@ bool Fing::operator==(const Fing & rhs) const{
 
     return (statbufRhs.st_dev == statbuf.st_dev && statbufRhs.st_ino == statbuf.st_ino);
 }
+
+ostream &operator<<(ostream &stream, Fing &val) {
+    return stream << val.path();    
+}
     
 string Fing::path() const { 
     return path_;

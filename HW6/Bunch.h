@@ -106,6 +106,8 @@ class Bunch {
     std::vector<Fing> entries;
 };
 
+std::ostream &operator<<(std::ostream &, const Bunch &);
+
 #endif
 
 

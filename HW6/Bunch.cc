@@ -123,7 +123,9 @@ bool Bunch::operator!=(const Bunch & rhs) const {
 Bunch::operator bool() const { return empty(); }
 
 ostream &operator<<(ostream &stream, Bunch &val) {
-    return stream << "empty?: " << val.empty();    
+    if(!val.empty()) for(size_t i = 0; i < val.size(); i++) stream << val.entry(i) << "\n";
+    else stream << "Bunch empty";
+    return stream;   
 }
 
 // ---------------------------------------------------------------------

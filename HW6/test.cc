@@ -39,8 +39,11 @@ int main() {
 	assert(b1+b2 == b3);
 	assert(b1 == b3-b2);
     cout << "preceding yeet" << endl;
+    cout << "----------- b1 before  -----------\n";
+    cout << b1 << endl;
 	assert(b1);
-    cout << "yeet" << endl;
+    cout << "----------- b1 after -------------\n";
+    cout << b1 << endl;
 	assert(b2);
 	assert(b3);
 	assert(!(b1-b1));
