@@ -42,26 +42,10 @@ Bunch &Bunch::operator=(const Bunch &rhs) {
     return *this;
 }
 
-/* Used for set sorting
-struct path_compare {
-    bool operator() (const Fing& x, const Fing& y) const {
-        return x.path_.compare(y.path_) < 0;
-    }
-};
-*/
-
 //TODO: make statbuf an attribute of a fing
 // Creating a set from vector: https://bit.ly/2Ivowaf
 // while(inode < rhs.inode) check for if same
 Bunch Bunch::operator+(const Bunch & rhs) const {
-    /*set<Fing, path_compare> s;
-    
-    unsigned size = entries.size();
-    for( unsigned i = 0; i < size; ++i ) s.insert( entries[i] );
-    
-    size = rhs.entries.size();
-    for( unsigned i = 0; i < size; ++i ) s.insert( rhs.entries[i] );
-    */
     Bunch freshBunch = *this;
     
     for(const auto &newFing : rhs.entries) {
@@ -70,20 +54,21 @@ Bunch Bunch::operator+(const Bunch & rhs) const {
     
     return freshBunch;
 }
+
 Bunch Bunch::operator-(const Bunch &rhs) const {
     Bunch freshBunch = *this;
-    for(size_t i = 0; i < size(); i++) {
-        for(const auto &rhsFing : rhs.entries)
-            if(freshBunch.entries[i] == rhsFing) 
+    for(size_t i = 0; i < freshBunch.size(); i++) { // go by size of freshBunch
+        for(const auto &rhsFing : rhs.entries) {
+            if(freshBunch.entries[i] == rhsFing) {
                 freshBunch.entries.erase(freshBunch.entries.begin() + i);
+            }
+        }
     }
     return freshBunch;
 }
 
 Bunch Bunch::operator+=(const Bunch &rhs) {
-    for(const auto &newFing : rhs.entries) {
-        addEntry(newFing);
-    }
+    for(const auto &newFing : rhs.entries) addEntry(newFing);
     
     return *this;
 }
@@ -96,34 +81,36 @@ Bunch Bunch::operator-=(const Bunch &rhs) {
     return *this;
 }
 
-
-// Can number of fings be different, like one be a subset?
 bool Bunch::operator==(const Bunch &rhs) const {
-    if(this->size() != rhs.size()) return false;
 
     bool fingFound = false;
-    
-    for(const auto &fing1 : entries) {
-        for(const auto &fing2 : rhs.entries) {
-            if(fing1 == fing2) { 
-                fingFound = true;
-                break;
+    if(this->size() == rhs.size()) {
+        for(const auto &fing1 : entries) {
+            for(const auto &fing2 : rhs.entries) {
+                if(fing1 == fing2) { 
+                    fingFound = true;
+                    break;
+                }
             }
+            if(fingFound) continue;
+            else break;
         }
-        if(fingFound) continue;
-        else break;
     }
     
     return fingFound;
 }
+
 bool Bunch::operator!=(const Bunch & rhs) const {
     return (*this == rhs) ? false : true;
 }
 
-Bunch::operator bool() const { return empty(); }
+Bunch::operator bool() const { 
+    return !empty(); 
+    
+}
 
-ostream &operator<<(ostream &stream, Bunch &val) {
-    if(!val.empty()) for(size_t i = 0; i < val.size(); i++) stream << val.entry(i) << "\n";
+ostream &operator<<(ostream &stream, const Bunch &val) {
+    if(!val.empty()) for(size_t i = 0; i < val.size(); i++) stream << *val.entry(i) << "\n";
     else stream << "Bunch empty";
     return stream;   
 }

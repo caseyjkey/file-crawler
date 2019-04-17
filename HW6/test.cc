@@ -38,15 +38,16 @@ int main() {
 	assert((b1+b2).size() == 6);
 	assert(b1+b2 == b3);
 	assert(b1 == b3-b2);
-    cout << "preceding yeet" << endl;
-    cout << "----------- b1 before  -----------\n";
-    cout << b1 << endl;
+    
 	assert(b1);
-    cout << "----------- b1 after -------------\n";
-    cout << b1 << endl;
+    
 	assert(b2);
+    
 	assert(b3);
+    //cout << "----------- before  -----------\n" << b1 << endl;
 	assert(!(b1-b1));
+    //cout << "----------- after -------------\n" << b1 << endl;
+    //cout << "To infinity, and beyond!" << endl;
     }
     catch (string err) {
 	cerr << "ERROR: " << err << '\n';
