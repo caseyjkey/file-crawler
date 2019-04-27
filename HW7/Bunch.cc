@@ -139,7 +139,7 @@ string Bunch::path() const {
     return path_;
 }
 
-bool Bunch::addEntry(const Fing &newFing) {
+bool Bunch::addEntry(const Fing *newFing) {
     bool fingFound = false;
     
     for(const auto &fing : entries) {
