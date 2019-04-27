@@ -24,7 +24,7 @@ Bunch::Bunch(const string &path) {
             
             // Begin assigning values to attributes
             path_        = path;
-            entries.push_back(Fing(path_));
+            entries.push_back(new const Fing(path_));
             traverse(path_);
 }
 
@@ -51,7 +51,7 @@ Bunch Bunch::operator+(const Bunch & rhs) const {
     for(const Fing *newFing : rhs.entries) {
         // Fing *copyOfNewFing = new Fing(*newFing); // New puts things in the heap 
 		// unique_ptr<Fing> copyOfNewFing( new Fing(*newFing) );
-        freshBunch.addEntry(new Fing(*newFing));
+        freshBunch.addEntry(new const Fing(*newFing));
     }
     
     return freshBunch;
@@ -70,7 +70,7 @@ Bunch Bunch::operator-(const Bunch &rhs) const {
 }
 
 Bunch Bunch::operator+=(const Bunch &rhs) {
-    for(const auto &newFing : rhs.entries) addEntry(new Fing(*newFing));
+    for(const auto &newFing : rhs.entries) addEntry(new const Fing(*newFing));
     return *this;
 }
 
