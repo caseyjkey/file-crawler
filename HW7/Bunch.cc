@@ -132,7 +132,7 @@ const Fing * Bunch::entry(size_t index) const {
         throw ss.str();
     }
     
-    return &entries[index];
+    return entries[index];
 }
 
 string Bunch::path() const {
