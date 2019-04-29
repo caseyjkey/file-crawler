@@ -92,7 +92,7 @@ class Bunch {
     bool               addEntry(const Fing *); // we could use smart pointers to store references to Fings in entries
     std::string        path() const;
     
-    typedef std::vector<const Fing *>::iterator iterator;
+    typedef std::vector<const Fing *>::const_iterator iterator;
     
     iterator begin() const {
         return entries.begin();

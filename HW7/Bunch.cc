@@ -172,9 +172,8 @@ string Bunch::traverse(const string &directory) {
             if ( (entry -> d_name[0]) != '.')  {
                 
                 nextFilename << directory << "/" << entry->d_name;
-                
-                Fing newEntry = Fing(nextFilename.str());
-                entries.push_back(newEntry);
+
+                entries.push_back(new Fing(nextFilename.str()));
                 
                 if (stat(nextFilename.str().c_str(), &info) != 0) 
                     throw "Error, " + nextFilename.str() + " is not a valid file or directory\n";
@@ -193,7 +192,7 @@ string Bunch::traverse(const string &directory) {
 // updatePath: clears out old entries and traverses
 void Bunch::updatePath() {
     entries.clear();
-    entries.push_back(Fing(path_));
+    entries.push_back(new Fing(path_));
     traverse(path_);
     return;
 }
