@@ -10,6 +10,7 @@
 #include <pwd.h>
 #include <string>
 #include <grp.h>
+#include <typeinfo>           // For typeid
 using namespace std;
 
 // ---------------------- Constructors ---------------------------------
@@ -42,7 +43,7 @@ Bunch &Bunch::operator=(const Bunch &rhs) {
     return *this;
 }
 
-//TODO: make statbuf an attribute of a fing
+// TODO: make statbuf an attribute of a fing
 // Creating a set from vector: https://bit.ly/2Ivowaf
 // while(inode < rhs.inode) check for if same
 Bunch Bunch::operator+(const Bunch & rhs) const {
@@ -143,7 +144,10 @@ bool Bunch::addEntry(const Fing *newFing) {
     bool fingFound = false;
     
     for(const auto &fing : entries) {
-        if(fing == newFing) { 
+		
+		//cout << "\nTypes: " << typeid(fing).name() << " == " << typeid(newFing).name();
+		//cout << boolalpha << (*fing == *newFing) << "\n";
+        if(*fing == *newFing) { 
             fingFound = true;
             break;
         }

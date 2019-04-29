@@ -18,13 +18,21 @@ void dump(string label, const Bunch &b) {
 
 int main() {
     try {
-	const auto home = getpwnam("cs253")->pw_dir; // cs253’s home dir
-	if (chdir(home) != 0)			     // go to ~cs253
-	    throw "Can’t chdir to "s + home;
-	const Bunch b1("pub/tree/alpha/iota");
-	Bunch b2("pub/tree2/tau");
-	dump("b1", b1);
-	
+		const auto home = getpwnam("cs253")->pw_dir; // cs253’s home dir
+		if (chdir(home) != 0)			     // go to ~cs253
+			throw "Can’t chdir to "s + home;
+		const Bunch b1("pub/tree/alpha/iota");
+		Bunch b2("pub/tree2/tau");
+		dump("b1", b1);
+		b2 += Bunch("/etc/group");
+		dump("b2", b2);
+		dump("b1+b2", b1+b2);
+		Bunch b3(b2);
+		b3 += b1;
+		dump("b3 after +=", b3);
+		b3 += b1; // Yes, I did it twice.
+		dump("second b3 after +=", b3);
+		b3 -= Bunch("/etc/resolv.conf");	// Should have no effect
     }
     catch (string err) {
 	cerr << "ERROR: " << err << '\n';

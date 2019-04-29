@@ -1,6 +1,5 @@
 #include "Bunch.h"
 #include <sstream>    // For ostringstream
-
 using namespace std;
 
 Fing::Fing() { }
@@ -25,12 +24,18 @@ Fing &Fing::operator=(const Fing & rhs) {
     return *this;
 }
 
-bool Fing::operator==(const Fing & rhs) const{
+bool Fing::operator==(const Fing &rhs) const{
     struct stat statbuf;
     struct stat statbufRhs;
     lstat(path().c_str(), &statbuf);
     lstat(rhs.path().c_str(), &statbufRhs);
-
+	
+	/* cout << "\n--------- fing == fing2 -----------\n" 
+	     << "rhs: " << statbufRhs.st_dev 
+		 << "\nlhs: " << statbuf.st_dev
+ 		 << "\nino rhs: " << statbufRhs.st_ino
+		 << "\nino rhs: " << statbuf.st_ino << "\n"; */
+	
     return (statbufRhs.st_dev == statbuf.st_dev && statbufRhs.st_ino == statbuf.st_ino);
 }
 
