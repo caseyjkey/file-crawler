@@ -29,12 +29,30 @@ int main() {
 		dump("b1+b2", b1+b2);
 		Bunch b3(b2);
 		b3 += b1;
-		dump("b3 after +=", b3);
-		b3 += b1; // Yes, I did it twice.
-		dump("second b3 after +=", b3);
+		b3 += b1;				// Yes, I did it twice.
 		b3 -= Bunch("/etc/resolv.conf");	// Should have no effect
-    }
+		cout << "b3:\n";
+		for (auto fp : b3)
+			cout << string(fp->perms()) << ' ' << fp->path() << '\n';
+		
+		
+		
+		// No output is expected after this.  The assertions should all succeed.
+		assert(b1.size() == 3);
+		assert(b2.size() == 3);
+		assert((b1+b2).size() == 6);
+		assert(b1+b2 == b3);
+		assert(b1 == b3-b2);
+		assert(b1);
+		assert(b2);
+		assert(b3);
+		assert(!(b1-b1));
+		assert(!b1.empty());
+		assert((b3-b3).empty());
+		
+	}
+		
     catch (string err) {
-	cerr << "ERROR: " << err << '\n';
-    }
+		cerr << "ERROR: " << err << '\n';
+	}
 }

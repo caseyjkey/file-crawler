@@ -86,10 +86,10 @@ Bunch Bunch::operator-=(const Bunch &rhs) {
 
 bool Bunch::operator==(const Bunch &rhs) const {
     bool fingFound = false;
-    if(this->size() == rhs.size()) {
+    if(size() == rhs.size()) {
         for(const auto &fing1 : entries) {
             for(const auto &fing2 : rhs.entries) {
-                if(fing1 == fing2) { 
+                if(*fing1 == *fing2) { 
                     fingFound = true;
                     break;
                 }
