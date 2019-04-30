@@ -25,12 +25,15 @@ Bunch::Bunch(const string &path) {
             
             // Begin assigning values to attributes
             path_        = path;
-            entries.push_back(new const Fing(path_));
+            entries.push_back(Fing::makeFing(path_));
             traverse(path_);
 }
 
 // Dtor
-Bunch::~Bunch() {}
+Bunch::~Bunch() {
+	for(auto &fing : entries)
+		delete fing;
+}
 
 // Copy Ctor
 Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_), entries(rhs.entries) { }
@@ -52,7 +55,7 @@ Bunch Bunch::operator+(const Bunch & rhs) const {
     for(const Fing *newFing : rhs.entries) {
         // Fing *copyOfNewFing = new Fing(*newFing); // New puts things in the heap 
 		// unique_ptr<Fing> copyOfNewFing( new Fing(*newFing) );
-        freshBunch.addEntry(new const Fing(*newFing));
+        freshBunch.addEntry(Fing::makeFing(newFing->path()));
     }
     
     return freshBunch;
@@ -71,7 +74,7 @@ Bunch Bunch::operator-(const Bunch &rhs) const {
 }
 
 Bunch Bunch::operator+=(const Bunch &rhs) {
-    for(const auto &newFing : rhs.entries) addEntry(new const Fing(*newFing));
+    for(const auto &newFing : rhs.entries) addEntry(Fing::makeFing(newFing->path()));
     return *this;
 }
 
@@ -153,7 +156,7 @@ bool Bunch::addEntry(const Fing *newFing) {
         }
     }
     
-    if(!fingFound) entries.push_back(newFing); // Possibly change to new Fing(*newFing)
+    if(!fingFound) entries.push_back(Fing::makeFing(newFing->path())); // Possibly change to new Fing(*newFing)
     return !fingFound;
 }
 // ------------------------------------------------------------------------
@@ -177,7 +180,7 @@ string Bunch::traverse(const string &directory) {
                 
                 nextFilename << directory << "/" << entry->d_name;
 
-                entries.push_back(new Fing(nextFilename.str()));
+                entries.push_back(Fing::makeFing(nextFilename.str()));
                 
                 if (stat(nextFilename.str().c_str(), &info) != 0) 
                     throw "Error, " + nextFilename.str() + " is not a valid file or directory\n";
@@ -196,7 +199,7 @@ string Bunch::traverse(const string &directory) {
 // updatePath: clears out old entries and traverses
 void Bunch::updatePath() {
     entries.clear();
-    entries.push_back(new Fing(path_));
+    entries.push_back(Fing::makeFing(path_));
     traverse(path_);
     return;
 }

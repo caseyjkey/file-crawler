@@ -24,7 +24,7 @@ class Dual {
 class Fing {
     
   public:
-    ~Fing(); // Dtor
+    virtual ~Fing() = 0; // Dtor
     Fing(const Fing &); // Copy Ctor
     Fing(const std::string &); // Ctor
     
@@ -39,6 +39,9 @@ class Fing {
     Dual<std::string, time_t>       atime() const;
     Dual<std::string, time_t>       mtime() const;
     Dual<std::string, time_t>       ctime() const;
+	
+	static const Fing * makeFing(const std::string &);
+	virtual std::string type() const = 0;
       
   private:
     Fing(); // No-arg Ctor is an Error
@@ -61,6 +64,36 @@ class Fing {
     std::string time(bool, bool, bool) const;
     bool        empty() const;
     
+};
+
+class Regular : public Fing {
+  public:	
+	~Regular(); // Dtor
+    Regular(const Regular &); // Copy Ctor
+    Regular(const std::string &); // Ctor
+	using Fing::Fing;
+	
+	std::string type() const;
+};
+
+class Directory : public Fing {
+  public:	
+	~Directory(); // Dtor
+    Directory(const Directory &); // Copy Ctor
+    Directory(const std::string &); // Ctor
+	using Fing::Fing;
+  
+	std::string type() const;
+};
+
+class Symlink : public Fing {
+  public:	
+    ~Symlink(); // Dtor
+    Symlink(const Symlink &); // Copy Ctor
+    Symlink(const std::string &); // Ctor
+	using Fing::Fing;
+  
+	std::string type() const;
 };
 
 std::ostream &operator<<(std::ostream &, const Fing &);

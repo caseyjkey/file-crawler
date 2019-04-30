@@ -50,6 +50,41 @@ int main() {
 		assert(!b1.empty());
 		assert((b3-b3).empty());
 		
+		Bunch::iterator it = b1.begin();
+		assert(it != b1.end());
+		const Fing *cfp = *it;
+		assert(cfp != nullptr);
+		assert(cfp->size() > 0);
+		assert(b1.size() == 3);
+		++it; assert(it != b1.end()); // it now “points” to the second entry
+		it++; assert(b1.end() != it); // it now “points” to the third entry
+		++it; assert(it == b1.end()); // it now “points” PAST the third entry
+
+		const Bunch lotsafiles("pub/lotsafiles");
+		cout << "yeet" << endl;
+		for (const Fing *fp : lotsafiles) {
+			const string perms = fp->perms(), type = fp->type();
+			switch (perms[0]) {
+			case 'd':
+				assert(type == "directory");
+				assert(dynamic_cast<const Directory *>(fp));
+				assert(dynamic_cast<const Symlink *>(fp) == nullptr);
+				break;
+			case 'l':
+				assert(type == "symlink");
+				assert(dynamic_cast<const Symlink *>(fp));
+				assert(dynamic_cast<const Regular *>(fp) == nullptr);
+				break;
+			case '-':
+				assert(type == "regular");
+				assert(dynamic_cast<const Regular *>(fp));
+				assert(dynamic_cast<const Directory *>(fp) == nullptr);
+				break;
+			}
+		}
+
+
+		
 	}
 		
     catch (string err) {

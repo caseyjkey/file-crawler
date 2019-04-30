@@ -6,6 +6,7 @@ Fing::Fing() { }
 
 Fing::~Fing() {}
 
+// Constructor
 Fing::Fing(const string &path) {
 	struct stat statbuf;
     int openFile = lstat(path.c_str(), &statbuf);
@@ -16,7 +17,50 @@ Fing::Fing(const string &path) {
     
 }
 
+// Copy Constructor
 Fing::Fing(const Fing & rhs) : path_(rhs.path_) { }
+
+// ------------ Derived Classes --------------
+
+Regular::~Regular() { }
+
+Regular::Regular(const string &path) : Fing(path) { }
+
+Directory::~Directory() { }
+
+Directory::Directory(const string &path) : Fing(path) { }
+
+Symlink::~Symlink() { }
+
+Symlink::Symlink(const string &path) : Fing(path) { }
+
+
+string Regular::type() const {
+	return "regular";
+}
+
+string Symlink::type() const {
+	return "symlink";
+}
+
+string Directory::type() const {
+	return "directory";
+}
+
+// Factory method credit to: https://bit.ly/2ZJYeqJ
+const Fing * Fing::makeFing(const string &path) {
+	struct stat statbuf;
+    int openFile = lstat(path.c_str(), &statbuf);
+	if(openFile != 0) 
+        throw "cannot access '" + path + "': No such file or directory\n";
+	if(S_ISDIR(statbuf.st_mode))
+		return new Directory(path);
+    else if(S_ISLNK(statbuf.st_mode))
+		return new Symlink(path);
+	return new Regular(path);
+}
+
+// ----------- End of Derived Classes -------------
 
 Fing &Fing::operator=(const Fing & rhs) {
     path_ = rhs.path_;
