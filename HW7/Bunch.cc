@@ -32,11 +32,13 @@ Bunch::Bunch(const string &path) {
 // Dtor
 Bunch::~Bunch() {
 	for(auto &fing : entries)
-		delete fing;
+		delete(fing);
 }
 
 // Copy Ctor
-Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_), entries(rhs.entries) { }
+Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_) { 
+    for(const auto &fing : rhs.entries) entries.push_back(Fing::makeFing(fing->path()));
+}
 
 // ---------------------- Operators ------------------------------------
 
@@ -65,7 +67,8 @@ Bunch Bunch::operator-(const Bunch &rhs) const {
     Bunch freshBunch = *this;
     for(size_t i = 0; i < freshBunch.size(); i++) { // go by size of freshBunch
         for(const auto &rhsFing : rhs.entries) {
-            if(freshBunch.entries[i] == rhsFing) {
+            if(*freshBunch.entries[i] == *rhsFing) {
+                delete freshBunch.entries[i];
                 freshBunch.entries.erase(freshBunch.entries.begin() + i); // are the fings destroyed or memory leak?
             }
         }
@@ -73,16 +76,18 @@ Bunch Bunch::operator-(const Bunch &rhs) const {
     return freshBunch;
 }
 
-Bunch Bunch::operator+=(const Bunch &rhs) {
+Bunch &Bunch::operator+=(const Bunch &rhs) {
     for(const auto &newFing : rhs.entries) addEntry(Fing::makeFing(newFing->path()));
     return *this;
 }
 
-Bunch Bunch::operator-=(const Bunch &rhs) {
+Bunch &Bunch::operator-=(const Bunch &rhs) {
     for(size_t i = 0; i < size(); i++) {
         for(const auto &rhsFing : rhs.entries)
-            if(entries[i] == rhsFing) 
+            if(entries[i] == rhsFing) {
+                delete entries[i];
                 entries.erase(entries.begin() + i);
+            }
     }
     return *this;
 }
@@ -155,8 +160,7 @@ bool Bunch::addEntry(const Fing *newFing) {
             break;
         }
     }
-    
-    if(!fingFound) entries.push_back(Fing::makeFing(newFing->path())); // Possibly change to new Fing(*newFing)
+    if(!fingFound) entries.push_back(newFing); // Possibly change to new Fing(*newFing)
     return !fingFound;
 }
 // ------------------------------------------------------------------------

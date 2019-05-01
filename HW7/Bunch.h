@@ -110,8 +110,8 @@ class Bunch {
 	Bunch operator+(const Bunch &) const;
 	Bunch operator-(const Bunch &) const;
 	
-	Bunch operator+=(const Bunch &);
-	Bunch operator-=(const Bunch &);
+	Bunch &operator+=(const Bunch &);
+	Bunch &operator-=(const Bunch &);
 	
 	bool operator==(const Bunch &) const;
 	bool operator!=(const Bunch &) const;

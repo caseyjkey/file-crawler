@@ -22,15 +22,15 @@ Fing::Fing(const Fing & rhs) : path_(rhs.path_) { }
 
 // ------------ Derived Classes --------------
 
-Regular::~Regular() { }
+Regular::~Regular() = default;
 
 Regular::Regular(const string &path) : Fing(path) { }
 
-Directory::~Directory() { }
+Directory::~Directory() = default;
 
 Directory::Directory(const string &path) : Fing(path) { }
 
-Symlink::~Symlink() { }
+Symlink::~Symlink() = default;
 
 Symlink::Symlink(const string &path) : Fing(path) { }
 
@@ -53,10 +53,14 @@ const Fing * Fing::makeFing(const string &path) {
     int openFile = lstat(path.c_str(), &statbuf);
 	if(openFile != 0) 
         throw "cannot access '" + path + "': No such file or directory\n";
-	if(S_ISDIR(statbuf.st_mode))
+	
+    if(S_ISDIR(statbuf.st_mode))
 		return new Directory(path);
-    else if(S_ISLNK(statbuf.st_mode))
-		return new Symlink(path);
+    
+    if(S_ISLNK(statbuf.st_mode)) {
+        return new Symlink(path);
+    }
+
 	return new Regular(path);
 }
 

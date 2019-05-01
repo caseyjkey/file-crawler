@@ -12,7 +12,7 @@ using namespace std;
 void dump(string label, const Bunch &b) {
     cout << label << ":\n";
     for (const Fing *p : b)
-	cout << string(p->perms()) << ' ' << p->path() << '\n';
+	cout << string(p->perms()) << ' ' << p->path() << endl;
     cout << '\n';
 }
 
@@ -24,8 +24,10 @@ int main() {
 		const Bunch b1("pub/tree/alpha/iota");
 		Bunch b2("pub/tree2/tau");
 		dump("b1", b1);
+        dump("b2", b2);
+        dump("Bunch(/etc/group", Bunch("/etc/group"));
 		b2 += Bunch("/etc/group");
-		dump("b2", b2);
+		dump("b2 += Bunch(/etc/group)", b2);
 		dump("b1+b2", b1+b2);
 		Bunch b3(b2);
 		b3 += b1;
@@ -42,6 +44,8 @@ int main() {
 		assert(b2.size() == 3);
 		assert((b1+b2).size() == 6);
 		assert(b1+b2 == b3);
+        dump("b3-b2", b3-b2);
+        dump("b1", b1);
 		assert(b1 == b3-b2);
 		assert(b1);
 		assert(b2);
