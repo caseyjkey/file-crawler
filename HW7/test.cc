@@ -65,7 +65,6 @@ int main() {
 		++it; assert(it == b1.end()); // it now “points” PAST the third entry
 
 		const Bunch lotsafiles("pub/lotsafiles");
-		cout << "yeet" << endl;
 		for (const Fing *fp : lotsafiles) {
 			const string perms = fp->perms(), type = fp->type();
 			switch (perms[0]) {

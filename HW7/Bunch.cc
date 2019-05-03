@@ -10,7 +10,6 @@
 #include <pwd.h>
 #include <string>
 #include <grp.h>
-#include <typeinfo>           // For typeid
 using namespace std;
 
 // ---------------------- Constructors ---------------------------------
@@ -186,8 +185,8 @@ string Bunch::traverse(const string &directory) {
 
                 entries.push_back(Fing::makeFing(nextFilename.str()));
                 
-                if (stat(nextFilename.str().c_str(), &info) != 0) 
-                    throw "Error, " + nextFilename.str() + " is not a valid file or directory\n";
+                if (lstat(nextFilename.str().c_str(), &info) != 0) 
+                    cerr << "Error, " + nextFilename.str() + " is not a valid file or directory\n";
                 
                 else if (S_ISDIR(info.st_mode))
                     traverse(nextFilename.str());

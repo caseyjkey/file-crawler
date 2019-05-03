@@ -147,7 +147,7 @@ string Fing::user_NAME(uid_t uid) const {
 
 string Fing::group_NAME(gid_t gid) const {
     struct group *grp;
-    if((grp = getgrgid(gid)) != NULL)
+    if((grp = getgrgid(gid)) == NULL)
         throw "requested gid not found in group database\n";
     return grp->gr_name;
 }
