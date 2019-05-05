@@ -30,8 +30,16 @@ Bunch::Bunch(const string &path) {
 
 // Dtor
 Bunch::~Bunch() {
-	for(auto &fing : entries)
+	cout << "Bunch: " << path() << "\n";
+	for(auto &fing : entries) {
+		cout << "Deleting: " << string(fing->perms()) << ' ' << fing->path() << endl;
 		delete(fing);
+		
+	}
+	entries.clear();
+	for(auto entry : entries)
+		cout << "Should be deleted: " << entry->path() << endl;
+	cout << boolalpha << empty() << endl;
 }
 
 // Copy Ctor
@@ -67,7 +75,7 @@ Bunch Bunch::operator-(const Bunch &rhs) const {
     for(size_t i = 0; i < freshBunch.size(); i++) { // go by size of freshBunch
         for(const auto &rhsFing : rhs.entries) {
             if(*freshBunch.entries[i] == *rhsFing) {
-                delete freshBunch.entries[i];
+                delete(freshBunch.entries[i]);
                 freshBunch.entries.erase(freshBunch.entries.begin() + i); // are the fings destroyed or memory leak?
             }
         }
@@ -84,8 +92,9 @@ Bunch &Bunch::operator-=(const Bunch &rhs) {
     for(size_t i = 0; i < size(); i++) {
         for(const auto &rhsFing : rhs.entries)
             if(entries[i] == rhsFing) {
-                delete entries[i];
+                delete(entries[i]);
                 entries.erase(entries.begin() + i);
+				
             }
     }
     return *this;
@@ -201,6 +210,8 @@ string Bunch::traverse(const string &directory) {
 
 // updatePath: clears out old entries and traverses
 void Bunch::updatePath() {
+	for(auto &fing : entries)
+		delete(fing);
     entries.clear();
     entries.push_back(Fing::makeFing(path_));
     traverse(path_);

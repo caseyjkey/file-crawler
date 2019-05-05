@@ -26,13 +26,18 @@ int main() {
 		dump("b1", b1);
         dump("b2", b2);
         dump("Bunch(/etc/group", Bunch("/etc/group"));
+		// This causes memory leak
 		b2 += Bunch("/etc/group");
 		dump("b2 += Bunch(/etc/group)", b2);
 		dump("b1+b2", b1+b2);
 		Bunch b3(b2);
+		
 		b3 += b1;
+		
 		b3 += b1;				// Yes, I did it twice.
+		
 		b3 -= Bunch("/etc/resolv.conf");	// Should have no effect
+		/*
 		cout << "b3:\n";
 		for (auto fp : b3)
 			cout << string(fp->perms()) << ' ' << fp->path() << '\n';
@@ -53,7 +58,8 @@ int main() {
 		assert(!(b1-b1));
 		assert(!b1.empty());
 		assert((b3-b3).empty());
-		
+		*/
+		/*
 		Bunch::iterator it = b1.begin();
 		assert(it != b1.end());
 		const Fing *cfp = *it;
@@ -63,7 +69,7 @@ int main() {
 		++it; assert(it != b1.end()); // it now “points” to the second entry
 		it++; assert(b1.end() != it); // it now “points” to the third entry
 		++it; assert(it == b1.end()); // it now “points” PAST the third entry
-
+		
 		const Bunch lotsafiles("pub/lotsafiles");
 		for (const Fing *fp : lotsafiles) {
 			const string perms = fp->perms(), type = fp->type();
@@ -85,8 +91,8 @@ int main() {
 				break;
 			}
 		}
-
-
+		
+		*/
 		
 	}
 		
