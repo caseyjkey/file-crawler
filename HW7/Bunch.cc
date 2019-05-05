@@ -10,6 +10,7 @@
 #include <pwd.h>
 #include <string>
 #include <grp.h>
+#include <memory>             // For smart ptrs
 using namespace std;
 
 // ---------------------- Constructors ---------------------------------
@@ -30,6 +31,7 @@ Bunch::Bunch(const string &path) {
 
 // Dtor
 Bunch::~Bunch() {
+	/*
 	cout << "Bunch: " << path() << "\n";
 	for(auto &fing : entries) {
 		cout << "Deleting: " << string(fing->perms()) << ' ' << fing->path() << endl;
@@ -40,6 +42,7 @@ Bunch::~Bunch() {
 	for(auto entry : entries)
 		cout << "Should be deleted: " << entry->path() << endl;
 	cout << boolalpha << empty() << endl;
+	*/
 }
 
 // Copy Ctor
@@ -61,7 +64,7 @@ Bunch &Bunch::operator=(const Bunch &rhs) {
 Bunch Bunch::operator+(const Bunch & rhs) const {
     Bunch freshBunch = *this;
     
-    for(const Fing *newFing : rhs.entries) {
+    for(auto newFing : rhs.entries) {
         // Fing *copyOfNewFing = new Fing(*newFing); // New puts things in the heap 
 		// unique_ptr<Fing> copyOfNewFing( new Fing(*newFing) );
         freshBunch.addEntry(Fing::makeFing(newFing->path()));
@@ -75,7 +78,6 @@ Bunch Bunch::operator-(const Bunch &rhs) const {
     for(size_t i = 0; i < freshBunch.size(); i++) { // go by size of freshBunch
         for(const auto &rhsFing : rhs.entries) {
             if(*freshBunch.entries[i] == *rhsFing) {
-                delete(freshBunch.entries[i]);
                 freshBunch.entries.erase(freshBunch.entries.begin() + i); // are the fings destroyed or memory leak?
             }
         }
@@ -92,7 +94,6 @@ Bunch &Bunch::operator-=(const Bunch &rhs) {
     for(size_t i = 0; i < size(); i++) {
         for(const auto &rhsFing : rhs.entries)
             if(entries[i] == rhsFing) {
-                delete(entries[i]);
                 entries.erase(entries.begin() + i);
 				
             }
@@ -149,14 +150,14 @@ const Fing * Bunch::entry(size_t index) const {
         throw ss.str();
     }
     
-    return entries[index];
+    return entries[index].get();
 }
 
 string Bunch::path() const {
     return path_;
 }
 
-bool Bunch::addEntry(const Fing *newFing) {
+bool Bunch::addEntry(shared_ptr<const Fing> newFing) {
     bool fingFound = false;
     
     for(const auto &fing : entries) {
@@ -168,6 +169,7 @@ bool Bunch::addEntry(const Fing *newFing) {
             break;
         }
     }
+
     if(!fingFound) entries.push_back(newFing); // Possibly change to new Fing(*newFing)
     return !fingFound;
 }
@@ -210,8 +212,6 @@ string Bunch::traverse(const string &directory) {
 
 // updatePath: clears out old entries and traverses
 void Bunch::updatePath() {
-	for(auto &fing : entries)
-		delete(fing);
     entries.clear();
     entries.push_back(Fing::makeFing(path_));
     traverse(path_);

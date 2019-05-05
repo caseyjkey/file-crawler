@@ -7,6 +7,7 @@
 #include <vector>
 #include <pwd.h>
 #include <grp.h>
+#include <memory> // For shared ptrs
 
 // Credit to Jack "Mr. C" Applin
 // https://bit.ly/2UkmGQt
@@ -40,7 +41,7 @@ class Fing {
     Dual<std::string, time_t>       mtime() const;
     Dual<std::string, time_t>       ctime() const;
 	
-	static const Fing * makeFing(const std::string &);
+	static std::shared_ptr<const Fing> makeFing(const std::string &);
 	virtual std::string type() const = 0;
       
   private:
@@ -119,20 +120,26 @@ class Bunch {
     explicit operator bool() const;
 	
     
-    size_t     		   size() const;      // number of entries 
-    bool       		   empty() const;
+    size_t     		                  size() const;      // number of entries 
+    bool       		                  empty() const;
     const Fing *       entry(size_t) const;
-    bool               addEntry(const Fing *); // we could use smart pointers to store references to Fings in entries
-    std::string        path() const;
+    bool                              addEntry(std::shared_ptr<const Fing>); // we could use smart pointers to store references to Fings in entries
+    std::string                       path() const;
     
-    typedef std::vector<const Fing *>::const_iterator iterator;
-    
+    // S/O to S.O. https://bit.ly/2vEtBoU
+	class iterator : public std::vector<std::shared_ptr<const Fing>>::const_iterator {
+	  public:
+		iterator(typename std::vector<std::shared_ptr<const Fing>>::const_iterator c) : std::vector<std::shared_ptr<const Fing>>::const_iterator(c) { }
+		const Fing * operator*() {
+			return (std::vector<std::shared_ptr<const Fing>>::const_iterator::operator *()).get();
+		}
+	};
     iterator begin() const {
-        return entries.begin();
+        return iterator(entries.begin());
     }
     
     iterator end() const {
-        return entries.end();
+        return iterator(entries.end());
     }
     
   private:
@@ -146,7 +153,7 @@ class Bunch {
     void updatePath();
     std::string traverse(const std::string &);
     
-    std::vector<const Fing *> entries;
+    std::vector<std::shared_ptr<const Fing>> entries;
 };
 
 std::ostream &operator<<(std::ostream &, const Bunch &);

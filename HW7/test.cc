@@ -11,7 +11,7 @@ using namespace std;
 
 void dump(string label, const Bunch &b) {
     cout << label << ":\n";
-    for (const Fing *p : b)
+    for (auto p : b)
 	cout << string(p->perms()) << ' ' << p->path() << endl;
     cout << '\n';
 }

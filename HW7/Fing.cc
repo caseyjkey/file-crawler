@@ -48,20 +48,24 @@ string Directory::type() const {
 }
 
 // Factory method credit to: https://bit.ly/2ZJYeqJ
-const Fing * Fing::makeFing(const string &path) {
+shared_ptr<const Fing> Fing::makeFing(const string &path) {
 	struct stat statbuf;
     int openFile = lstat(path.c_str(), &statbuf);
 	if(openFile != 0) 
         throw "cannot access '" + path + "': No such file or directory\n";
 	
-    if(S_ISDIR(statbuf.st_mode))
-		return new Directory(path);
+    if(S_ISDIR(statbuf.st_mode)) {
+		shared_ptr<const Fing> p(new Directory(path));
+		return p;
+	}
     
     if(S_ISLNK(statbuf.st_mode)) {
-        return new Symlink(path);
+		shared_ptr<const Fing> p(new Symlink(path));
+        return p;
     }
-
-	return new Regular(path);
+	
+	shared_ptr<const Fing> p(new Regular(path));
+	return p;
 }
 
 // ----------- End of Derived Classes -------------
