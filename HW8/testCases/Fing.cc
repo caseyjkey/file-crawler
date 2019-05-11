@@ -7,15 +7,7 @@ Fing::Fing() { }
 Fing::~Fing() {}
 
 // Constructor
-Fing::Fing(const string &path) {
-	
-    int openFile = lstat(path.c_str(), &statbuf);
-    if(openFile != 0) 
-        throw "cannot access '" + path + "': No such file or directory\n";
-    
-    path_ = path;
-    
-}
+Fing::Fing(const string &path, struct stat &statbuf) : path_(path), statbuf_(statbuf) { }
 
 // Copy Constructor
 Fing::Fing(const Fing & rhs) : path_(rhs.path_) { }
@@ -24,15 +16,9 @@ Fing::Fing(const Fing & rhs) : path_(rhs.path_) { }
 
 Regular::~Regular() = default;
 
-Regular::Regular(const string &path) : Fing(path) { }
-
 Directory::~Directory() = default;
 
-Directory::Directory(const string &path) : Fing(path) { }
-
 Symlink::~Symlink() = default;
-
-Symlink::Symlink(const string &path) : Fing(path) { }
 
 
 string Regular::type() const {
@@ -55,16 +41,16 @@ shared_ptr<const Fing> Fing::makeFing(const string &path) {
         throw "cannot access '" + path + "': No such file or directory\n";
 	
     if(S_ISDIR(statbuf.st_mode)) {
-		shared_ptr<const Fing> p(new Directory(path));
+		shared_ptr<const Fing> p(new Directory(path, statbuf));
 		return p;
 	}
     
     if(S_ISLNK(statbuf.st_mode)) {
-		shared_ptr<const Fing> p(new Symlink(path));
+		shared_ptr<const Fing> p(new Symlink(path, statbuf));
         return p;
     }
 	
-	shared_ptr<const Fing> p(new Regular(path));
+	shared_ptr<const Fing> p(new Regular(path, statbuf));
 	return p;
 }
 

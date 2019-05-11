@@ -27,7 +27,8 @@ class Fing {
   public:
     virtual ~Fing() = 0; // Dtor
     Fing(const Fing &); // Copy Ctor
-    Fing(const std::string &); // Ctor
+    Fing(const std::string &, struct stat&); // Ctor
+    
     
     Fing & operator=(const Fing &);
     bool operator==(const Fing &) const;
@@ -50,7 +51,7 @@ class Fing {
       
     // ------------------ Fing Attributes ----------------
     std::string path_;
-    struct stat statbuf;
+    struct stat statbuf_;
     // ------------------ Helper Attributes ---------------
     off_t       fileSize_;
     
