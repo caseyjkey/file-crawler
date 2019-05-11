@@ -74,13 +74,17 @@ Bunch Bunch::operator+(const Bunch & rhs) const {
 }
 
 Bunch Bunch::operator-(const Bunch &rhs) const {
-    Bunch freshBunch = *this;
+    Bunch freshBunch = Bunch(path_);
     for(size_t i = 0; i < freshBunch.size(); i++) { // go by size of freshBunch
         for(const auto &rhsFing : rhs.entries) {
             if(*freshBunch.entries[i] == *rhsFing) {
-                cout << "yeet";
+                cout << " ---------------- yeet ------------------\n";
                 freshBunch.entries.erase(freshBunch.entries.begin() + i); // are the fings destroyed or memory leak?
-                cout << freshBunch.entries.size();
+                cout << "Size: " << freshBunch.entries.size() << "\n";
+                for (auto p : freshBunch)
+                    cout << string(p->perms()) << ' ' << p->path() << endl;
+                cout << "----------------------------------------\n";
+
             }
         }
     }
