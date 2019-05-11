@@ -7,18 +7,24 @@
 #include <iomanip>	// for setw
 #include <string>	// What a mystery!
 #include <chrono>   // For the stopwatch
+#include <vector>   // For testing
+#include <cstdlib>  // For parsing command line args
+#include <sys/ioctl.h> // For window
 
 using namespace std;
 
-void dump(string label, const Bunch &b) {
-    cout << label << ":\n";
-    for (auto p : b)
-	cout << string(p->perms()) << ' ' << p->path() << endl;
-    cout << '\n';
-}
 
-int jacksTest() {
+
+int jacksTest(bool quiet = false) {
+	
 	try {
+		
+		auto dump = (quiet) ? [] (string label, const Bunch &b) { } : [] (string label, const Bunch &b) {
+			cout << label << ":\n";
+			for (auto p : b)
+				cout << string(p->perms()) << ' ' << p->path() << endl;
+			cout << '\n';
+		};
 		const auto home = getpwnam("cs253")->pw_dir; // cs253’s home dir
 		if (chdir(home) != 0)			     // go to ~cs253
 			throw "Can’t chdir to "s + home;
@@ -39,21 +45,15 @@ int jacksTest() {
 		
 		b3 -= Bunch("/etc/resolv.conf");	// Should have no effect
 		
-		cout << "b3:\n";
-		for (auto fp : b3)
-			cout << string(fp->perms()) << ' ' << fp->path() << '\n';
-		
-		
-		
 		// No output is expected after this.  The assertions should all succeed.
 		assert(b1.size() == 3);
 		assert(b2.size() == 3);
 		assert((b1+b2).size() == 6);
 		assert(b1+b2 == b3);
+		dump("b3", b3);
+		dump("b2", b2);
         dump("b3-b2", b3-b2);
         dump("b1", b1);
-		dump("b3 - b2", b3-b2);
-		cout << "yuh\n";
 		assert(b1 == b3-b2);
 		assert(b1);
 		assert(b2);
@@ -106,12 +106,34 @@ int jacksTest() {
 	return 0;
 }
 
-int main() {
-	int startTime = chrono::high_resolution_clock::now()
-            	.time_since_epoch().count();
-    jacksTest();
-	int finishTime = startTime - chrono::high_resolution_clock::now()
-            	.time_since_epoch().count();
-	cout << "Finish time: " << finishTime;
+int main(int argc, char *argv[]) {
+	int reps = atoi(argv[argc - 1]);
+	int startTime = 0;
+	int finishTime = 0;
+	vector<double> times;
+	struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	cout << string(100, '\n') << "Progress: [";
+	double inc = 0;
+	int result = 0;
+	for(int i = 0; i < reps; i++) {
+		startTime = chrono::high_resolution_clock::now()
+					.time_since_epoch().count();
+		result = jacksTest(true);
+		finishTime = chrono::high_resolution_clock::now()
+					.time_since_epoch().count();
+		times.push_back((finishTime - startTime) / 1e9);
+		//cout << string((w.ws_col - 15) / reps, '#');
+		inc += 100.0/reps;
+		cout << string(100, '\n') << "Seconds: " << times.back() << "\nProgress: " << inc << "%\n";
+		
+		cout.flush();
+	}
+    cout << "\n";
+	double total = 0;
+	for(double time : times)
+		total += time;
+	cout << "Average: " << total/reps << endl;
+	cout << "Success?: " << boolalpha << !bool(result) << endl;
 	return 0;
 }
