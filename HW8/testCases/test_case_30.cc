@@ -5,7 +5,7 @@ using namespace std;
 
 int run_test_case(string &info) {
     Bunch b1("tree");
-    Bunch b2("tree/zeta");
+    const Bunch b2("tree/zeta");
 
     b1 -= b2;
 
