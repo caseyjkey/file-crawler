@@ -17,12 +17,10 @@ int run_test_case(string &info) {
 
     dump("B2: ", b2);
     dump("B1: ", b1);
-    cout << "Before: " << b1.size() << endl;
-    b1 = b1 - b2;
-    dump("B1: ", b1 - b2);
-    cout << "After: " << b1.size() << endl;
+    b1 -= b2;
+    dump("B1: ", b1);
 
-    EXPECT((b1 - b2).size() == 4)
+    EXPECT(b1.size() == 4)
 
     return 0;
 }
