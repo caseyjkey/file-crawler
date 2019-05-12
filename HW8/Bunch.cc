@@ -59,9 +59,9 @@ Bunch &Bunch::operator=(const Bunch &rhs) {
 // while(inode < rhs.inode) check for if same
 Bunch Bunch::operator+(const Bunch & rhs) const {
     Bunch freshBunch = *this;
-    freshBunch.entries.reserve(size() + rhs.size());
+    //freshBunch.entries.reserve(size() + rhs.size());
     for(auto newFing : rhs.entries)
-        freshBunch.addEntry(Fing::makeFing(newFing->path()));
+        freshBunch.entries.insert(Fing::makeFing(newFing->path()));
     
     return freshBunch;
 }
@@ -69,44 +69,49 @@ Bunch Bunch::operator+(const Bunch & rhs) const {
 Bunch Bunch::operator-(const Bunch &rhs) const {
     Bunch freshBunch(*this);
     //Bunch freshBunch = Bunch(path_);  // This does not trigger the assignment operator    
-    for(size_t i = 0; i < freshBunch.size(); i++) { // go by size of freshBunch
-        for(const auto &rhsFing : rhs.entries) {
-            if(*freshBunch.entries[i] == *rhsFing) {
-                freshBunch.entries.erase(freshBunch.entries.begin() + i);
-            }
-        }
-    }
+    
+	for(const auto &rhsFing : rhs.entries)
+		if(entries.find(rhsFing) != end())
+			freshBunch.entries.erase(rhsFing);
+ 
     return freshBunch;
 }
 
 Bunch &Bunch::operator+=(const Bunch &rhs) {
-	entries.reserve(size() + rhs.size());
-    for(const auto &newFing : rhs.entries) addEntry(Fing::makeFing(newFing->path()));
+	//entries.reserve(size() + rhs.size());
+    for(const auto &newFing : rhs.entries) entries.insert(Fing::makeFing(newFing->path()));
     return *this;
 }
 
 Bunch &Bunch::operator-=(const Bunch &rhs) {
-    for(size_t i = 0; i < size(); i++)
-        for(const auto &rhsFing : rhs.entries)
-            if(*entries[i] == *rhsFing) 
-                entries.erase(entries.begin() + i);
+	for(const auto &rhsFing : rhs.entries) {
+        //cout << rhsFing.get()->path() << endl;
+		if(entries.find(rhsFing) != end()) {
+            //cout << "trying to erase" << endl;
+			entries.erase(rhsFing);
+        }
+        //cout << "we did it" << endl;
+    }
     return *this;
 }
 
 bool Bunch::operator==(const Bunch &rhs) const {
-    bool fingFound = false;
+    bool fingFound = true;
     if(size() == rhs.size()) {
-        for(const auto &fing1 : entries) {
-            for(const auto &fing2 : rhs.entries) {
-                if(*fing1 == *fing2) { 
-                    fingFound = true;
-                    break;
-                }
-            }
-            if(fingFound) continue;
-            else break;
-        }
-    }
+        //cout << "size equal\n";
+        for(const auto &y : rhs.entries) {
+            //cout << "Looking for " << y.get()->path() << "\n";
+            if(entries.find(y) == end()) {
+                //cout << "Entry at this.entry(0): " << entry(0)->path() << "\n";
+                //cout << "Entry(0) hash: " << (entry(0)->statbuf_.st_dev + entry(0)->statbuf_.st_ino) << "\nrhs Fing hash: " << (y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino) << "\n";
+                //cout << "Each component for each hash: (" << entry(0)->statbuf_.st_dev << ", " << entry(0)->statbuf_.st_ino << "), (" << y.get()->statbuf_.st_dev << ", " << y.get()->statbuf_.st_ino << ")\n";
+                //auto lhs = shared_ptr<const Fing>(entry(0));
+                //cout << boolalpha << "fing_compare functor result: " << fing_compare_spec()(lhs, y) << endl;      //((entry(0)->statbuf_.st_dev + entry(0)->statbuf_.st_ino) < (y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino)) << endl;                 fingFound = false;
+				fingFound = false;
+                break;
+			}
+		}
+	}
     return fingFound;
 }
 
@@ -137,12 +142,14 @@ bool Bunch::empty() const { //is entries == 0?
 }
 const Fing * Bunch::entry(size_t index) const {
     stringstream ss;
-    if(index > entries.size()){
+    if(index >= entries.size()){
         ss << "expected 0 <= index <= " << entries.size() << " but received index " << index << "\n";
         throw ss.str();
     }
+
+    auto it = next(begin(), index);
     
-    return entries[index].get();
+    return *it;
 }
 
 string Bunch::path() const {
@@ -152,9 +159,9 @@ string Bunch::path() const {
 void Bunch::addEntry(shared_ptr<const Fing> newFing) {
     //bool fingFound = false;
     
-	iterator i = lower_bound(begin(), end(), newFing, fing_compare());
-	if(i == end() || fing_compare()(newFing, *i))
-		entries.insert(i, newFing);
+	//iterator i = lower_bound(begin(), end(), newFing);
+	//if(i == end() || fing_compare()(newFing, *i))
+		entries.insert(newFing);
 	
     /*for(const auto &fing : entries) {
 		
@@ -190,7 +197,7 @@ string Bunch::traverse(const string &directory) {
                 
                 nextFilename << directory << "/" << entry->d_name;
 
-                entries.push_back(Fing::makeFing(nextFilename.str()));
+                entries.insert(Fing::makeFing(nextFilename.str()));
                 
                 if (lstat(nextFilename.str().c_str(), &info) != 0) 
                     cerr << "Error, " + nextFilename.str() + " is not a valid file or directory\n";
@@ -209,7 +216,7 @@ string Bunch::traverse(const string &directory) {
 // updatePath: clears out old entries and traverses
 void Bunch::updatePath() {
     entries.clear();
-    entries.push_back(Fing::makeFing(path_));
+    entries.insert(Fing::makeFing(path_));
     traverse(path_);
     return;
 }

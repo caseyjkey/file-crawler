@@ -49,6 +49,8 @@ int jacksTest(bool quiet = false) {
 		assert(b1.size() == 3);
 		assert(b2.size() == 3);
 		assert((b1+b2).size() == 6);
+		dump("b3", b3);
+		dump("b1+b2", b1+b2);
 		assert(b1+b2 == b3);
 		dump("b3", b3);
 		dump("b2", b2);
@@ -60,7 +62,7 @@ int jacksTest(bool quiet = false) {
 		assert(b3);
 		assert(!(b1-b1));
 		assert(!b1.empty());
-		assert((b3-b3).empty());
+		assert((b3 - b3).empty());
 		
 		
 		Bunch::iterator it = b1.begin();

@@ -8,7 +8,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <memory> // For shared ptrs
-
+#include <algorithm> // For lower_bound
 // Credit to Jack "Mr. C" Applin
 // https://bit.ly/2UkmGQt
 
@@ -104,7 +104,14 @@ std::ostream &operator<<(std::ostream &, const Fing &);
 
 struct fing_compare {
 	bool operator() (std::shared_ptr<const Fing> x, std::shared_ptr<const Fing> y) const {
-		return x.get()->statbuf_.st_dev + x.get()->statbuf_.st_ino < y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino;
+    //std::cout << "working with " << x.get()->path() << " and " << y.get()->path() << "\n";
+		return (x.get()->statbuf_.st_dev + x.get()->statbuf_.st_ino) < (y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino);
+	}
+};
+
+struct fing_compare_spec {
+	bool operator() (std::shared_ptr<const Fing> x, std::shared_ptr<const Fing> y) const {
+    return (x.get()->statbuf_.st_dev + x.get()->statbuf_.st_ino) < (y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino);
 	}
 };
 
