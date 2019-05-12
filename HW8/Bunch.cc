@@ -18,7 +18,7 @@ using namespace std;
 Bunch::Bunch(const string &path) {            
             // Begin assigning values to attributes
             path_        = path;
-            entries.push_back(Fing::makeFing(path_));
+            entries.insert(Fing::makeFing(path_));
             traverse(path_);
 }
 
@@ -41,7 +41,7 @@ Bunch::~Bunch() {
 // Copy Ctor
 Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_) { 
 	//cout << "Using copy ctor! ---------------------\n";
-    entries = vector<shared_ptr<const Fing>>(rhs.entries.begin(), rhs.entries.end());
+    entries = set<shared_ptr<const Fing>, fing_compare>(rhs.entries.begin(), rhs.entries.end());
 	//for(const auto &fing : rhs.entries) 
      //   entries.push_back(Fing::makeFing(fing->path()));
 }
@@ -50,9 +50,7 @@ Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_) {
 
 Bunch &Bunch::operator=(const Bunch &rhs) {
     path_ = rhs.path_; 
-    entries.clear();
-    for(const auto &fing : rhs.entries) 
-        entries.push_back(Fing::makeFing(fing->path()));
+    entries = set<shared_ptr<const Fing>, fing_compare>(rhs.entries.begin(), rhs.entries.end());
     return *this;
 }
 
@@ -61,12 +59,9 @@ Bunch &Bunch::operator=(const Bunch &rhs) {
 // while(inode < rhs.inode) check for if same
 Bunch Bunch::operator+(const Bunch & rhs) const {
     Bunch freshBunch = *this;
-    
-    for(auto newFing : rhs.entries) {
-        // Fing *copyOfNewFing = new Fing(*newFing); // New puts things in the heap 
-		// unique_ptr<Fing> copyOfNewFing( new Fing(*newFing) );
+    freshBunch.entries.reserve(size() + rhs.size());
+    for(auto newFing : rhs.entries)
         freshBunch.addEntry(Fing::makeFing(newFing->path()));
-    }
     
     return freshBunch;
 }
@@ -77,7 +72,7 @@ Bunch Bunch::operator-(const Bunch &rhs) const {
     for(size_t i = 0; i < freshBunch.size(); i++) { // go by size of freshBunch
         for(const auto &rhsFing : rhs.entries) {
             if(*freshBunch.entries[i] == *rhsFing) {
-                *freshBunch.entries.erase(freshBunch.entries.begin() + i);
+                freshBunch.entries.erase(freshBunch.entries.begin() + i);
             }
         }
     }
@@ -85,6 +80,7 @@ Bunch Bunch::operator-(const Bunch &rhs) const {
 }
 
 Bunch &Bunch::operator+=(const Bunch &rhs) {
+	entries.reserve(size() + rhs.size());
     for(const auto &newFing : rhs.entries) addEntry(Fing::makeFing(newFing->path()));
     return *this;
 }
@@ -153,10 +149,14 @@ string Bunch::path() const {
     return path_;
 }
 
-bool Bunch::addEntry(shared_ptr<const Fing> newFing) {
-    bool fingFound = false;
+void Bunch::addEntry(shared_ptr<const Fing> newFing) {
+    //bool fingFound = false;
     
-    for(const auto &fing : entries) {
+	iterator i = lower_bound(begin(), end(), newFing, fing_compare());
+	if(i == end() || fing_compare()(newFing, *i))
+		entries.insert(i, newFing);
+	
+    /*for(const auto &fing : entries) {
 		
 		//cout << "\nTypes: " << typeid(fing).name() << " == " << typeid(newFing).name();
 		//cout << boolalpha << (*fing == *newFing) << "\n";
@@ -164,10 +164,10 @@ bool Bunch::addEntry(shared_ptr<const Fing> newFing) {
             fingFound = true;
             break;
         }
-    }
+    }*/
 
-    if(!fingFound) entries.push_back(newFing); // Possibly change to new Fing(*newFing)
-    return !fingFound;
+    //if(!fingFound) entries.push_back(newFing); // Possibly change to new Fing(*newFing)
+    //return !fingFound;
 }
 // ------------------------------------------------------------------------
 

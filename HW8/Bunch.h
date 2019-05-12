@@ -4,7 +4,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <vector>
+#include <set>
 #include <pwd.h>
 #include <grp.h>
 #include <memory> // For shared ptrs
@@ -102,6 +102,12 @@ class Symlink : public Fing {
 
 std::ostream &operator<<(std::ostream &, const Fing &);
 
+struct fing_compare {
+	bool operator() (std::shared_ptr<const Fing> x, std::shared_ptr<const Fing> y) const {
+		return x.get()->statbuf_.st_dev + x.get()->statbuf_.st_ino < y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino;
+	}
+};
+
 class Bunch {
   public:
     ~Bunch();
@@ -126,15 +132,15 @@ class Bunch {
     size_t     		                  size() const;      // number of entries 
     bool       		                  empty() const;
     const Fing *                      entry(size_t) const;
-    bool                              addEntry(std::shared_ptr<const Fing>); // we could use smart pointers to store references to Fings in entries
+    void                              addEntry(std::shared_ptr<const Fing>); // we could use smart pointers to store references to Fings in entries
     std::string                       path() const;
     
     // S/O to S.O. https://bit.ly/2vEtBoU
-	class iterator : public std::vector<std::shared_ptr<const Fing>>::const_iterator {
+	class iterator : public std::set<std::shared_ptr<const Fing>>::const_iterator {
 	  public:
-		iterator(typename std::vector<std::shared_ptr<const Fing>>::const_iterator c) : std::vector<std::shared_ptr<const Fing>>::const_iterator(c) { }
+		iterator(typename std::set<std::shared_ptr<const Fing>>::const_iterator c) : std::set<std::shared_ptr<const Fing>>::const_iterator(c) { }
 		const Fing * operator*() {
-			return (std::vector<std::shared_ptr<const Fing>>::const_iterator::operator *()).get();
+			return (std::set<std::shared_ptr<const Fing>>::const_iterator::operator *()).get();
 		}
 	};
     iterator begin() const {
@@ -156,8 +162,10 @@ class Bunch {
     void updatePath();
     std::string traverse(const std::string &);
     
-    std::vector<std::shared_ptr<const Fing>> entries;
+    std::set<std::shared_ptr<const Fing>, fing_compare> entries;
 };
+
+
 
 std::ostream &operator<<(std::ostream &, const Bunch &);
 
