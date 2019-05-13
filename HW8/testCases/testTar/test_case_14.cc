@@ -4,14 +4,10 @@
 using namespace std;
 
 int run_test_case(string &info) {
-    Bunch b1("tree");
-    Bunch b2("tree2");
+    Bunch b("simple");
 
-    b2 = b1;
-
-    b1 -= b1;
-
-    EXPECT(b1.empty())
+    auto it = b.begin();
+    EXPECT(++it == b.end())
 
     return 0;
 }

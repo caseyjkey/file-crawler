@@ -5,13 +5,11 @@ using namespace std;
 
 int run_test_case(string &info) {
     Bunch b1("tree");
-    Bunch b2("tree2");
+    const Bunch b2("tree/zeta");
 
-    b2 = b1;
+    b1 -= b2;
 
-    b1 -= b1;
-
-    EXPECT(b1.empty())
+    EXPECT(b1.size() == 4)
 
     return 0;
 }

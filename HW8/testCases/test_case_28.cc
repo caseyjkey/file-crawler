@@ -9,9 +9,9 @@ int run_test_case(string &info) {
 
     b2 = b1;
 
-    b1 -= b1;
+    b1 -= b2;
 
-    EXPECT(b1.empty())
+    EXPECT(b2.size() == 9)
 
     return 0;
 }

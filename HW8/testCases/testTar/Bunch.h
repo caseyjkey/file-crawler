@@ -102,14 +102,14 @@ class Symlink : public Fing {
 
 std::ostream &operator<<(std::ostream &, const Fing &);
 
-struct fing_compare_ptr {
+struct fing_compare {
 	bool operator() (std::shared_ptr<const Fing> x, std::shared_ptr<const Fing> y) const {
     //std::cout << "working with " << x.get()->path() << " and " << y.get()->path() << "\n";
 		return (x.get()->statbuf_.st_dev + x.get()->statbuf_.st_ino) < (y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino);
 	}
 };
 
-struct fing_compare_noptr {
+struct fing_compare_spec {
 	bool operator() (const Fing *x, const Fing *y) const {
 		return (x->statbuf_.st_dev + x->statbuf_.st_ino) < (y->statbuf_.st_dev + y->statbuf_.st_ino);
 	}
@@ -169,7 +169,7 @@ class Bunch {
     void updatePath();
     std::string traverse(const std::string &);
     
-    std::set<std::shared_ptr<const Fing>, fing_compare_ptr> entries;
+    std::set<std::shared_ptr<const Fing>, fing_compare> entries;
 };
 
 
