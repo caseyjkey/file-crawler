@@ -165,6 +165,9 @@ string Bunch::traverse(const string &directory) {
 
                 entries.insert(Fing::makeFing(nextFilename.str()));
                 
+                if (lstat(nextFilename.str().c_str(), &info) != 0) 
+                    cerr << "Error, " + nextFilename.str() + " is not a valid file or directory\n";
+                
                 else if (S_ISDIR(info.st_mode))
                     traverse(nextFilename.str());
             }

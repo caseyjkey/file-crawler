@@ -25,19 +25,17 @@ int jacksTest(bool quiet = false) {
 				cout << string(p->perms()) << ' ' << p->path() << endl;
 			cout << '\n';
 		};
-		const auto home = getpwnam("caseykey")->pw_dir; // was cs253’s home dir
-		if (chdir(home) != 0)			// go to ~
+		const auto home = getpwnam("cs253")->pw_dir; // cs253’s home dir
+		if (chdir(home) != 0)			     // go to ~cs253
 			throw "Can’t chdir to "s + home;
-		const Bunch b1("/");
-		Bunch b2("CS253");
-		cout << "yeet" << endl;
+		const Bunch b1("pub/tree/alpha/iota");
+		Bunch b2("pub/tree2/tau");
 		dump("b1", b1);
-		cout << "past b1" << endl;
-		dump("b2", b2);
-		dump("Bunch(/CS320", Bunch("/CS320"));
+        dump("b2", b2);
+        dump("Bunch(/etc/group", Bunch("/etc/group"));
 		// This causes memory leak
-		b2 += Bunch("/CS320");
-		dump("b2 += Bunch(CS320)", b2);
+		b2 += Bunch("/etc/group");
+		dump("b2 += Bunch(/etc/group)", b2);
 		dump("b1+b2", b1+b2);
 		Bunch b3(b2);
 		
@@ -45,7 +43,7 @@ int jacksTest(bool quiet = false) {
 		
 		b3 += b1;				// Yes, I did it twice.
 		
-		b3 -= Bunch("/GEOL101");	// Should have no effect
+		b3 -= Bunch("/etc/resolv.conf");	// Should have no effect
 		
 		// No output is expected after this.  The assertions should all succeed.
 		assert(b1.size() == 3);
@@ -56,8 +54,8 @@ int jacksTest(bool quiet = false) {
 		assert(b1+b2 == b3);
 		dump("b3", b3);
 		dump("b2", b2);
-		dump("b3-b2", b3-b2);
-		dump("b1", b1);
+        dump("b3-b2", b3-b2);
+        dump("b1", b1);
 		assert(b1 == b3-b2);
 		assert(b1);
 		assert(b2);
@@ -78,8 +76,8 @@ int jacksTest(bool quiet = false) {
 		it++; assert(b1.end() != it); // it now “points” to the third entry
 		++it; assert(it == b1.end()); // it now “points” PAST the third entry
 		
-		const Bunch cs253("CS253");
-		for (const Fing *fp : cs253) {
+		const Bunch lotsafiles("pub/lotsafiles");
+		for (const Fing *fp : lotsafiles) {
 			const string perms = fp->perms(), type = fp->type();
 			switch (perms[0]) {
 			case 'd':
@@ -104,87 +102,27 @@ int jacksTest(bool quiet = false) {
 		
 	}
 		
-	catch (string err) {
+    catch (string err) {
 		cerr << "ERROR: " << err << '\n';
 		return 1;
 	}
 	return 0;
 }
-
-int caseysTest(bool quiet = false) {
-	
-	try {
-		
-		auto dump = (quiet) ? [] (string label, const Bunch &b) { } : [] (string label, const Bunch &b) {
-			cout << label << ":\n";
-			for (auto p : b)
-				cout << string(p->perms()) << ' ' << p->path() << endl;
-			cout << '\n';
-		};
-		
-		string homedir;
-		if (getenv("HOME")) 
-			homedir = getpwuid(getuid())->pw_dir;
-		
-		const Bunch b1(homedir);
-		dump("b1", b1);
-		
-		Bunch::iterator it = b1.begin();
-		assert(it != b1.end());
-		const Fing *cfp = *it;
-		assert(cfp != nullptr);
-		assert(cfp->size() > 0);
-		++it; assert(it != b1.end()); // it now “points” to the second entry
-		it++; assert(b1.end() != it); // it now “points” to the third entry
-		
-		for (const Fing *fp : b1) {
-			const string perms = fp->perms(), type = fp->type();
-			switch (perms[0]) {
-			case 'd':
-				assert(type == "directory");
-				assert(dynamic_cast<const Directory *>(fp));
-				assert(dynamic_cast<const Symlink *>(fp) == nullptr);
-				break;
-			case 'l':
-				assert(type == "symlink");
-				assert(dynamic_cast<const Symlink *>(fp));
-				assert(dynamic_cast<const Regular *>(fp) == nullptr);
-				break;
-			case '-':
-				assert(type == "regular");
-				assert(dynamic_cast<const Regular *>(fp));
-				assert(dynamic_cast<const Directory *>(fp) == nullptr);
-				break;
-			}
-		}
-		
-		
-		
-	}
-		
-	catch (string err) {
-		cerr << "ERROR: " << err << '\n';
-		return 1;
-	}
-	return 0;
-}
-
 
 int main(int argc, char *argv[]) {
 	int reps = atoi(argv[argc - 1]);
-	bool quiet = !bool(argv[1]);
 	int startTime = 0;
 	int finishTime = 0;
 	vector<double> times;
 	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	cout << string(100, '\n') << "Progress: [";
 	double inc = 0;
 	int result = 0;
 	for(int i = 0; i < reps; i++) {
 		startTime = chrono::high_resolution_clock::now()
 					.time_since_epoch().count();
-		result = caseysTest(quiet);
+		result = jacksTest(true);
 		finishTime = chrono::high_resolution_clock::now()
 					.time_since_epoch().count();
 		times.push_back((finishTime - startTime) / 1e9);
@@ -194,7 +132,7 @@ int main(int argc, char *argv[]) {
 		
 		cout.flush();
 	}
-	cout << "\n";
+    cout << "\n";
 	double total = 0;
 	for(double time : times)
 		total += time;

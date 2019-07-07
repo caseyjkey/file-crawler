@@ -2,13 +2,12 @@
 #define BUNCH_H
 
 #include <string>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <sys/stat.h>       // For lstat
 #include <set>
 #include <pwd.h>
 #include <grp.h>
-#include <memory> // For shared ptrs
-#include <algorithm> // For lower_bound
+#include <memory>           // For shared ptrs
+
 // Credit to Jack "Mr. C" Applin
 // https://bit.ly/2UkmGQt
 
@@ -65,14 +64,14 @@ class Fing {
     int         group_UID(const struct stat &) const;
     std::string group_NAME(gid_t) const;
     std::string permissions() const;
-    std::string time(bool, bool, bool) const;
+    std::string time(bool = 0, bool = 1, bool = 0) const;
     bool        empty() const;
     
 };
 
 class Regular : public Fing {
   public:	
-	~Regular(); // Dtor
+	~Regular() = default; // Dtor
     Regular(const Regular &); // Copy Ctor
     Regular(const std::string &); // Ctor
 	using Fing::Fing;
@@ -82,7 +81,7 @@ class Regular : public Fing {
 
 class Directory : public Fing {
   public:	
-	~Directory(); // Dtor
+	~Directory() = default; // Dtor
     Directory(const Directory &); // Copy Ctor
     Directory(const std::string &); // Ctor
 	using Fing::Fing;
@@ -92,7 +91,7 @@ class Directory : public Fing {
 
 class Symlink : public Fing {
   public:	
-    ~Symlink(); // Dtor
+    ~Symlink() = default; // Dtor
     Symlink(const Symlink &); // Copy Ctor
     Symlink(const std::string &); // Ctor
 	using Fing::Fing;
@@ -117,7 +116,7 @@ struct fing_compare_noptr {
 
 class Bunch {
   public:
-    ~Bunch();
+    ~Bunch() = default;
     Bunch(const Bunch &);
     
     Bunch(const std::string &);
@@ -139,7 +138,6 @@ class Bunch {
     size_t     		                  size() const;      // number of entries 
     bool       		                  empty() const;
     const Fing *                      entry(size_t) const;
-    void                              addEntry(std::shared_ptr<const Fing>); // we could use smart pointers to store references to Fings in entries
     std::string                       path() const;
     
     // S/O to S.O. https://bit.ly/2vEtBoU

@@ -14,13 +14,6 @@ Fing::Fing(const Fing & rhs) : path_(rhs.path_) { }
 
 // ------------ Derived Classes --------------
 
-Regular::~Regular() = default;
-
-Directory::~Directory() = default;
-
-Symlink::~Symlink() = default;
-
-
 string Regular::type() const {
 	return "regular";
 }
@@ -63,13 +56,6 @@ Fing &Fing::operator=(const Fing & rhs) {
 }
 
 bool Fing::operator==(const Fing &rhs) const{
-	
-	/* cout << "\n--------- fing == fing2 -----------\n" 
-	     << "rhs: " << statbufRhs.st_dev 
-		 << "\nlhs: " << statbuf.st_dev
- 		 << "\nino rhs: " << statbufRhs.st_ino
-		 << "\nino rhs: " << statbuf.st_ino << "\n"; */
-	
     return (rhs.statbuf_.st_dev == statbuf_.st_dev && rhs.statbuf_.st_ino == statbuf_.st_ino);
 }
 
@@ -129,7 +115,6 @@ string Fing::permissions() const {
     if(S_ISDIR(statbuf_.st_mode)) os <<  "d";
     else if(S_ISLNK(statbuf_.st_mode)) os << "l";
     else if(S_ISREG(statbuf_.st_mode)) os << "-";
-    //else throw runtime_error(PROGNAME + ": " + path_ + " is an undefined file type, wtf?!\n");
     os << (statbuf_.st_mode & S_IRUSR ? 'r' : '-');
     os << (statbuf_.st_mode & S_IWUSR ? 'w' : '-');
     os << (statbuf_.st_mode & S_IXUSR ? 'x' : '-');
@@ -145,7 +130,7 @@ string Fing::permissions() const {
     return os.str();
 }
 
-string Fing::time(bool access = 0, bool mod = 1, bool status = 0) const {
+string Fing::time(bool access, bool mod, bool status) const {
     time_t fileTime;
     if(mod) {
         fileTime = statbuf_.st_mtime;
@@ -156,9 +141,7 @@ string Fing::time(bool access = 0, bool mod = 1, bool status = 0) const {
     else if(status) {
         fileTime = statbuf_.st_ctime;
     }
-    auto timeval = localtime(&fileTime);
     char buf[32];
-    strftime(buf, sizeof(buf), "%Y-%m-%dT%T", timeval);
-    string timeOutput(buf);
-    return timeOutput;
+    strftime(buf, sizeof(buf), "%Y-%m-%dT%T", localtime(&fileTime));
+    return string(buf);
 }

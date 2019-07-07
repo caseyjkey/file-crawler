@@ -1,16 +1,13 @@
 #include "Bunch.h"
 #include <iostream>           // For cerr
-#include <sys/types.h>
 #include <fstream>            // For ifstream
 #include <sstream>            // For ostringstream
 #include <dirent.h>           // For readDir()
 #include <sstream>
+#include <algorithm>
 #include <vector>
-#include <sys/stat.h>
-#include <pwd.h>
-#include <string>
-#include <grp.h>
-#include <memory>             // For smart ptrs
+#include <iterator>
+
 using namespace std;
 
 // ---------------------- Constructors ---------------------------------
@@ -22,26 +19,10 @@ Bunch::Bunch(const string &path) {
             traverse(path_);
 }
 
-// Dtor
-Bunch::~Bunch() {
-	/*
-	cout << "Bunch: " << path() << "\n";
-	for(auto &fing : entries) {
-		cout << "Deleting: " << string(fing->perms()) << ' ' << fing->path() << endl;
-		delete(fing);
-		
-	}
-	entries.clear();
-	for(auto entry : entries)
-		cout << "Should be deleted: " << entry->path() << endl;
-	cout << boolalpha << empty() << endl;
-	*/
-}
-
 // Copy Ctor
 Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_) { 
 	//cout << "Using copy ctor! ---------------------\n";
-    entries = set<shared_ptr<const Fing>, fing_compare>(rhs.entries.begin(), rhs.entries.end());
+    entries = set<shared_ptr<const Fing>, fing_compare_ptr>(rhs.entries.begin(), rhs.entries.end());
 	//for(const auto &fing : rhs.entries) 
      //   entries.push_back(Fing::makeFing(fing->path()));
 }
@@ -50,7 +31,7 @@ Bunch::Bunch(const Bunch &rhs) : path_(rhs.path_) {
 
 Bunch &Bunch::operator=(const Bunch &rhs) {
     path_ = rhs.path_; 
-    entries = set<shared_ptr<const Fing>, fing_compare>(rhs.entries.begin(), rhs.entries.end());
+    entries = set<shared_ptr<const Fing>, fing_compare_ptr>(rhs.entries.begin(), rhs.entries.end());
     return *this;
 }
 
@@ -60,8 +41,8 @@ Bunch &Bunch::operator=(const Bunch &rhs) {
 Bunch Bunch::operator+(const Bunch & rhs) const {
     Bunch freshBunch = *this;
     //freshBunch.entries.reserve(size() + rhs.size());
-    for(auto newFing : rhs.entries)
-        freshBunch.entries.insert(Fing::makeFing(newFing->path()));
+    //for(auto newFing : rhs.entries)
+    freshBunch.entries.insert(rhs.entries.begin(), rhs.entries.end());//Fing::makeFing(newFing->path()));
     
     return freshBunch;
 }
@@ -71,7 +52,7 @@ Bunch Bunch::operator-(const Bunch &rhs) const {
     //Bunch freshBunch = Bunch(path_);  // This does not trigger the assignment operator    
     
 	for(const auto &rhsFing : rhs.entries)
-		if(entries.find(rhsFing) != end())
+		//if(entries.find(rhsFing) != end())
 			freshBunch.entries.erase(rhsFing);
  
     return freshBunch;
@@ -84,35 +65,47 @@ Bunch &Bunch::operator+=(const Bunch &rhs) {
 }
 
 Bunch &Bunch::operator-=(const Bunch &rhs) {
-	for(const auto &rhsFing : rhs.entries) {
+	//set<shared_ptr<const Fing>, fing_compare_ptr> diff(rhs.entries.begin(), rhs.entries.end());
+	//for(const auto &rhsFing : diff)
         //cout << rhsFing.get()->path() << endl;
-		if(entries.find(rhsFing) != end()) {
-            //cout << "trying to erase" << endl;
-			entries.erase(rhsFing);
-        }
-        //cout << "we did it" << endl;
-    }
-    return *this;
+		//if(entries.find(rhsFing) != end()) {
+          //  cout << "trying to erase" << endl;
+	//		entries.erase(rhsFing);
+        //}
+        //cout << "we did it" << endl;*/
+    // Ask S.O. about why this segfaults
+	vector<shared_ptr<const Fing>> diff;
+	auto it = set_difference(entries.begin(),     entries.end(), 
+                             rhs.entries.begin(), rhs.entries.end(), 
+                             diff.begin(), fing_compare_ptr());
+    entries = set<shared_ptr<const Fing>, fing_compare_ptr>(make_move_iterator(diff.begin()),                                                             make_move_iterator(it));
+	return *this;
 }
 
 bool Bunch::operator==(const Bunch &rhs) const {
     bool fingFound = true;
+	//cout << "==\n";
     if(size() == rhs.size()) {
         //cout << "size equal\n";
         for(const auto &y : rhs.entries) {
-            //cout << "Looking for " << y.get()->path() << "\n";
+            // cout << "Looking for " << y.get()->path() << "\n";
             if(entries.find(y) == end()) {
-                //cout << "Entry at this.entry(0): " << entry(0)->path() << "\n";
-                //cout << "Entry(0) hash: " << (entry(0)->statbuf_.st_dev + entry(0)->statbuf_.st_ino) << "\nrhs Fing hash: " << (y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino) << "\n";
-                //cout << "Each component for each hash: (" << entry(0)->statbuf_.st_dev << ", " << entry(0)->statbuf_.st_ino << "), (" << y.get()->statbuf_.st_dev << ", " << y.get()->statbuf_.st_ino << ")\n";
-                //auto lhs = shared_ptr<const Fing>(entry(0));
-                //cout << boolalpha << "fing_compare functor result: " << fing_compare_spec()(lhs, y) << endl;      //((entry(0)->statbuf_.st_dev + entry(0)->statbuf_.st_ino) < (y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino)) << endl;                 fingFound = false;
+               // cout << "Entry at this.entry(0): " << entry(0)->path() << "\n";
+               // cout << "Entry(0) hash: " << (entry(0)->statbuf_.st_dev + entry(0)->statbuf_.st_ino) << "\nrhs Fing hash: " << (y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino) << "\n";
+               // cout << "Each component for each hash: (" << entry(0)->statbuf_.st_dev << ", " << entry(0)->statbuf_.st_ino << "), (" << y.get()->statbuf_.st_dev << ", " << y.get()->statbuf_.st_ino << ")\n";
+               // auto lhs = shared_ptr<const Fing>(entry(0));
+               // cout << boolalpha << "fing_compare functor result: " << fing_compare_spec()(lhs, y) << endl;      //((entry(0)->statbuf_.st_dev + entry(0)->statbuf_.st_ino) < (y.get()->statbuf_.st_dev + y.get()->statbuf_.st_ino)) << endl;                 fingFound = false;
 				fingFound = false;
                 break;
 			}
 		}
 	}
-    return fingFound;
+	else fingFound = false;
+	return fingFound;
+	/*if(size() != rhs.size()) return false; 
+	set<shared_ptr<const Fing>, fing_compare_ptr> diff;
+	auto it = set_difference(entries.begin(), entries.end(), rhs.entries.begin(), rhs.entries.end(), diff.begin(), fing_compare_ptr());*/
+    //return (it == end()) ? true : false;
 }
 
 bool Bunch::operator!=(const Bunch & rhs) const {
@@ -138,11 +131,11 @@ size_t Bunch::size() const { // number of entries
     return entries.size();
 } 
 bool Bunch::empty() const { //is entries == 0?
-    return (size() == 0) ? true : false;
+    return (entries.size() == 0) ? true : false;
 }
 const Fing * Bunch::entry(size_t index) const {
-    stringstream ss;
     if(index >= entries.size()){
+		stringstream ss;
         ss << "expected 0 <= index <= " << entries.size() << " but received index " << index << "\n";
         throw ss.str();
     }
@@ -154,27 +147,6 @@ const Fing * Bunch::entry(size_t index) const {
 
 string Bunch::path() const {
     return path_;
-}
-
-void Bunch::addEntry(shared_ptr<const Fing> newFing) {
-    //bool fingFound = false;
-    
-	//iterator i = lower_bound(begin(), end(), newFing);
-	//if(i == end() || fing_compare()(newFing, *i))
-		entries.insert(newFing);
-	
-    /*for(const auto &fing : entries) {
-		
-		//cout << "\nTypes: " << typeid(fing).name() << " == " << typeid(newFing).name();
-		//cout << boolalpha << (*fing == *newFing) << "\n";
-        if(*fing == *newFing) { 
-            fingFound = true;
-            break;
-        }
-    }*/
-
-    //if(!fingFound) entries.push_back(newFing); // Possibly change to new Fing(*newFing)
-    //return !fingFound;
 }
 // ------------------------------------------------------------------------
 
@@ -220,4 +192,3 @@ void Bunch::updatePath() {
     traverse(path_);
     return;
 }
-

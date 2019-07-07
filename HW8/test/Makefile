@@ -1,4 +1,4 @@
-CXXFLAGS =-std=c++11 -O -ggdb -Wall -Wextra -Wpedantic
+CXXFLAGS =-std=c++11 -O -Wall -Wextra -Wpedantic
 
 hw7(Bunch.o): Bunch.o Fing.o
 	ar cr hw8.a Bunch.o
