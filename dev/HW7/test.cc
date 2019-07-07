@@ -37,7 +37,7 @@ int main() {
 		b3 += b1;				// Yes, I did it twice.
 		
 		b3 -= Bunch("/etc/resolv.conf");	// Should have no effect
-		/*
+		
 		cout << "b3:\n";
 		for (auto fp : b3)
 			cout << string(fp->perms()) << ' ' << fp->path() << '\n';
@@ -58,8 +58,8 @@ int main() {
 		assert(!(b1-b1));
 		assert(!b1.empty());
 		assert((b3-b3).empty());
-		*/
-		/*
+		
+		
 		Bunch::iterator it = b1.begin();
 		assert(it != b1.end());
 		const Fing *cfp = *it;
@@ -92,7 +92,7 @@ int main() {
 			}
 		}
 		
-		*/
+		
 		
 	}
 		
