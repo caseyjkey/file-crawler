@@ -1,8 +1,0 @@
-    What if you redefine new and delete for class Foo, and then derive class Bar from class Foo?
-        New and Delete from Foo may only handle 8 bytes, but we could want 16 bytes. Unless it is a template, templates will adjust themselves. 
-    Will Bar inherit the redefined new and delete?
-        Yes it will
-    Will that work, if sizeof(Bar) > sizeof(Foo)?
-        It will not
-    How would you fix that?
-        We will have to override the methods to adjust for 16 bytes.

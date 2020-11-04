@@ -1,4 +1,0 @@
-// This code demonstrates slicing. // The variable p only gets the first part of e. // Consider the difference if it had been a reference or pointer. #include <iostream> using namespace std; class Person { public: Person(long ss) : ss_num(ss) { } private: long ss_num; }; class Employee : public Person { public: Employee(long social, float pay) : Person(social), pay_rate(pay) { } private: float pay_rate; }; int main() { Employee e(123456789, 20.00); Person p = e; 
-cout << "size of p is " << sizeof(p) << '\n'; 
-cout << "size of e is " << sizeof(e) << '\n'; 
-return 0; }
