@@ -27,7 +27,7 @@ int jacksTest(bool quiet = false) {
 		};
 		const auto home = getpwnam("caseykey")->pw_dir; // was cs253’s home dir
 		if (chdir(home) != 0)			// go to ~
-			throw "Can’t chdir to "s + home;
+			throw "Can’t chdir to home"; // + home;
 		const Bunch b1("/");
 		Bunch b2("CS253");
 		cout << "yeet" << endl;
@@ -126,7 +126,7 @@ int caseysTest(bool quiet = false) {
 		if (getenv("HOME")) 
 			homedir = getpwuid(getuid())->pw_dir;
 		
-		const Bunch b1(homedir);
+		const Bunch b1(homedir + "/Development/CS475/project/randomCode");
 		dump("b1", b1);
 		
 		Bunch::iterator it = b1.begin();
@@ -172,7 +172,7 @@ int caseysTest(bool quiet = false) {
 
 int main(int argc, char *argv[]) {
 	int reps = atoi(argv[argc - 1]);
-	bool quiet = !bool(argv[1]);
+	bool quiet = true; //!bool(argv[1]);
 	int startTime = 0;
 	int finishTime = 0;
 	vector<double> times;
